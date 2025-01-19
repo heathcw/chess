@@ -21,11 +21,14 @@ public class BishopMovesCalculator {
             row--;
             col--;
             ChessPosition checkPosition = new ChessPosition(row, col);
-            if (board.getPiece(checkPosition) == null || board.getPiece(checkPosition).getTeamColor() != this.teamColor) {
+            if (board.getPiece(checkPosition) == null) {
                 ChessMove move = new ChessMove(myPosition, checkPosition, null);
                 moveCollection.add(move);
-            }
-            else {
+            } else if (board.getPiece(checkPosition).getTeamColor() != this.teamColor) {
+                ChessMove move = new ChessMove(myPosition, checkPosition, null);
+                moveCollection.add(move);
+                break;
+            } else {
                 canAdd = false;
             }
         }
@@ -37,11 +40,14 @@ public class BishopMovesCalculator {
             row++;
             col--;
             ChessPosition checkPosition = new ChessPosition(row, col);
-            if (board.getPiece(checkPosition) == null || board.getPiece(checkPosition).getTeamColor() != this.teamColor) {
+            if (board.getPiece(checkPosition) == null) {
                 ChessMove move = new ChessMove(myPosition, checkPosition, null);
                 moveCollection.add(move);
-            }
-            else {
+            } else if (board.getPiece(checkPosition).getTeamColor() != this.teamColor) {
+                ChessMove move = new ChessMove(myPosition, checkPosition, null);
+                moveCollection.add(move);
+                break;
+            } else {
                 canAdd = false;
             }
         }
@@ -53,11 +59,14 @@ public class BishopMovesCalculator {
             row++;
             col++;
             ChessPosition checkPosition = new ChessPosition(row, col);
-            if (board.getPiece(checkPosition) == null || board.getPiece(checkPosition).getTeamColor() != this.teamColor) {
+            if (board.getPiece(checkPosition) == null) {
                 ChessMove move = new ChessMove(myPosition, checkPosition, null);
                 moveCollection.add(move);
-            }
-            else {
+            } else if (board.getPiece(checkPosition).getTeamColor() != this.teamColor) {
+                ChessMove move = new ChessMove(myPosition, checkPosition, null);
+                moveCollection.add(move);
+                break;
+            } else {
                 canAdd = false;
             }
         }
@@ -69,11 +78,14 @@ public class BishopMovesCalculator {
             row--;
             col++;
             ChessPosition checkPosition = new ChessPosition(row, col);
-            if (board.getPiece(checkPosition) == null || board.getPiece(checkPosition).getTeamColor() != this.teamColor) {
+            if (board.getPiece(checkPosition) == null) {
                 ChessMove move = new ChessMove(myPosition, checkPosition, null);
                 moveCollection.add(move);
-            }
-            else {
+            } else if (board.getPiece(checkPosition).getTeamColor() != this.teamColor) {
+                ChessMove move = new ChessMove(myPosition, checkPosition, null);
+                moveCollection.add(move);
+                break;
+            } else {
                 canAdd = false;
             }
         }
