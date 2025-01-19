@@ -65,6 +65,9 @@ public class ChessPiece {
         } else if (this.type == PieceType.KNIGHT) {
             KnightMovesCalculator knightMoves = new KnightMovesCalculator(this.pieceColor);
             moveCollection = knightMoves.pieceMoves(board, myPosition);
+        } else if (this.type == PieceType.ROOK) {
+            RookMovesCalculator rookMoves = new RookMovesCalculator(this.pieceColor);
+            moveCollection = rookMoves.pieceMoves(board, myPosition);
         }
 
         return moveCollection;
