@@ -71,6 +71,9 @@ public class ChessPiece {
         } else if (this.type == PieceType.QUEEN) {
             QueenMovesCalculator queenMoves = new QueenMovesCalculator(this.pieceColor);
             moveCollection = queenMoves.pieceMoves(board, myPosition);
+        } else if (this.type == PieceType.PAWN) {
+            PawnMovesCalculator pawnMoves = new PawnMovesCalculator(this.pieceColor);
+            moveCollection = pawnMoves.pieceMoves(board, myPosition);
         }
 
         return moveCollection;

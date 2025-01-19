@@ -43,7 +43,7 @@ public class KingMovesCalculator {
     }
 
     private void addMove(ChessPosition checkPosition, ChessBoard board, ChessPosition myPosition, Collection<ChessMove> myCollection) {
-        if (checkPosition.getRow() >= 8 || checkPosition.getRow() <= 0 || checkPosition.getColumn() >= 8 || checkPosition.getColumn() <= 0) {
+        if (checkPosition.getRow() >= 8 || checkPosition.getRow() < 0 || checkPosition.getColumn() >= 8 || checkPosition.getColumn() < 0) {
             return;
         }
         if (board.getPiece(checkPosition) == null || board.getPiece(checkPosition).getTeamColor() != this.teamColor) {
