@@ -49,8 +49,8 @@ public class ChessBoard {
     public void resetBoard() {
         this.board = new ChessPiece[8][8];
 
-        /**
-         * First row whites
+        /*
+          First row whites
          */
         this.board[0][0] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
         this.board[0][1] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
@@ -61,8 +61,8 @@ public class ChessBoard {
         this.board[0][6] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
         this.board[0][7] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
 
-        /**
-         * Top row blacks
+        /*
+          Top row blacks
          */
         this.board[7][0] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
         this.board[7][1] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
@@ -73,8 +73,8 @@ public class ChessBoard {
         this.board[7][6] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
         this.board[7][7] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
 
-        /**
-         * Pawns
+        /*
+          Pawns
          */
         for (int i = 0; i < 8; i++) {
             this.board[1][i] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);

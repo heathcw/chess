@@ -5,7 +5,7 @@ import java.util.Collection;
 
 public class BishopMovesCalculator {
 
-    private ChessGame.TeamColor teamColor;
+    private final ChessGame.TeamColor teamColor;
 
     public BishopMovesCalculator(ChessGame.TeamColor teamColor) {
         this.teamColor = teamColor;
