@@ -55,7 +55,11 @@ public class ChessGame {
         if (pieceToMove == null) {
             return null;
         }
+        TeamColor team = pieceToMove.getTeamColor();
         moveCollection = pieceToMove.pieceMoves(this.board, startPosition);
+        for (ChessMove move: moveCollection) {
+            //if move would put king in check, remove move
+        }
 
         return moveCollection;
     }
