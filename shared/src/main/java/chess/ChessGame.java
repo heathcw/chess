@@ -154,15 +154,15 @@ public class ChessGame {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition checkPosition = new ChessPosition(i,j);
                 ChessPiece checkPiece = this.board.getPiece(checkPosition);
-                if (checkPiece != null && checkPiece.getPieceType() == ChessPiece.PieceType.KING && checkPiece.getTeamColor() == teamColor) {
+                if (checkPiece != null && checkPiece.getTeamColor() == teamColor) {
                     Collection<ChessMove> checkMoves = validMoves(checkPosition);
-                    if (checkMoves.isEmpty()) {
-                        return true;
+                    if (!checkMoves.isEmpty()) {
+                        return false;
                     }
                 }
             }
         }
-        return false;
+        return true;
     }
 
     /**
@@ -173,6 +173,9 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
+        if (isInCheck(teamColor)) {
+            return false;
+        }
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition checkPosition = new ChessPosition(i,j);
