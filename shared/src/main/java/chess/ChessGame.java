@@ -50,13 +50,14 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        Collection<ChessMove> moveCollection;
+        Collection<ChessMove> moveCollection = new ArrayList<>();
         ChessPiece pieceToMove = this.board.getPiece(startPosition);
         if (pieceToMove == null) {
             return null;
         }
         TeamColor team = pieceToMove.getTeamColor();
         moveCollection = pieceToMove.pieceMoves(this.board, startPosition);
+        Collection<ChessMove> removeCollection = new ArrayList<>();
         for (ChessMove move: moveCollection) {
             //if move would put king in check, remove move
             ChessPiece placeHolder = this.board.getPiece(move.getEndPosition());
@@ -65,13 +66,15 @@ public class ChessGame {
 
             //check if king is in check
             if (isInCheck(team)) {
-                moveCollection.remove(move);
+                removeCollection.add(move);
             }
             //return back to normal
             this.board.addPiece(move.getEndPosition(), placeHolder);
             this.board.addPiece(move.getStartPosition(), pieceToMove);
         }
-
+        for (ChessMove remove: removeCollection) {
+            moveCollection.remove(remove);
+        }
         return moveCollection;
     }
 
