@@ -8,6 +8,8 @@ public class MemoryUserDAO implements UserDAO {
 
     private ArrayList<UserData> users = new ArrayList<>();
 
+    public MemoryUserDAO() {}
+
     public void createUser(UserData data) {
         users.add(data);
     }
