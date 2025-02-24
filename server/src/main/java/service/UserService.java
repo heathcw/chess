@@ -1,14 +1,59 @@
 package service;
 
+import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryUserDAO;
+import model.AuthData;
+import model.UserData;
+
+import java.util.UUID;
+
 public class UserService {
 
-    //records for users
-    record RegisterRequest(String username, String password, String email){}
-    record RegisterResult(String username, String authToken){}
-    record LoginRequest(String username, String password){}
-    record LoginResult(String username, String password){}
-    record LogoutRequest(String authToken){}
-    record LogoutResult(){}
+    private MemoryUserDAO userDataAccess;
+    private MemoryAuthDAO authDataAccess;
 
-    //functions for userService
+    public UserService() {
+        userDataAccess = new MemoryUserDAO();
+        authDataAccess = new MemoryAuthDAO();
+    }
+
+    public RegisterResult register(RegisterRequest request) {
+        UserData data = new UserData(request.username(), request.password(), request.email());
+        UserData check = userDataAccess.getUser(request.username());
+        String tokenToAdd = UUID.randomUUID().toString();
+        AuthData token = new AuthData(tokenToAdd, request.username());
+
+        if (check == null) {
+            return null;
+        }
+
+        userDataAccess.createUser(data);
+        authDataAccess.createAuth(token);
+
+        return new RegisterResult(request.username(), tokenToAdd);
+    }
+
+    public LoginResult login(LoginRequest request) {
+        UserData data = userDataAccess.getUser(request.username());
+        if (data == null) {
+            return null;
+        }
+
+        String tokenToAdd = UUID.randomUUID().toString();
+        AuthData token = new AuthData(tokenToAdd, request.username());
+        authDataAccess.createAuth(token);
+
+        return new LoginResult(request.username(), tokenToAdd);
+    }
+
+    public LogoutResult logout(LogoutRequest request) {
+        AuthData data = authDataAccess.getAuth(request.authToken());
+        if (data == null) {
+            return null;
+        }
+
+        authDataAccess.deleteAuth(data);
+
+        return new LogoutResult();
+    }
 }
