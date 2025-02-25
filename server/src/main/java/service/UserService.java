@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryUserDAO;
 import model.AuthData;
@@ -46,7 +47,7 @@ public class UserService {
         return new LoginResult(request.username(), tokenToAdd);
     }
 
-    public LogoutResult logout(LogoutRequest request) {
+    public LogoutResult logout(LogoutRequest request) throws DataAccessException {
         AuthData data = authDataAccess.getAuth(request.authToken());
         if (data == null) {
             return null;
