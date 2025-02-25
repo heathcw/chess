@@ -11,4 +11,5 @@ public interface GameDAO {
     ArrayList<GameData> listGames();
     void joinGame(String playerColor, String username, int ID);
     void updateGame(GameData data);
+    void clear();
 }
