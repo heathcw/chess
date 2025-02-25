@@ -43,9 +43,14 @@ public class MemoryGameDAO implements GameDAO {
     @Override
     public void joinGame(String playerColor, String username, int ID) {
         GameData gameToJoin = getGameByID(ID);
+        GameData changeGame;
         if (playerColor.equals("WHITE")) {
-
+            changeGame = new GameData(ID, username, gameToJoin.blackUsername(), gameToJoin.gameName(), gameToJoin.game());
         }
+        else {
+            changeGame = new GameData(ID, gameToJoin.whiteUsername(), username, gameToJoin.gameName(), gameToJoin.game());
+        }
+        games.set(games.indexOf(gameToJoin),changeGame);
     }
 
     @Override

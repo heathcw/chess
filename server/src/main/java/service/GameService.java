@@ -46,10 +46,13 @@ public class GameService {
 
     public JoinResult joinGame(JoinRequest request) throws DataAccessException {
         try {
-            authDataAccess.getAuth(request.authToken());
+           AuthData auth = authDataAccess.getAuth(request.authToken());
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
+        AuthData auth = authDataAccess.getAuth(request.authToken());
+        gameDataAccess.joinGame(request.playerColor(), auth.username(), request.gameID());
 
+        return new JoinResult();
     }
 }
