@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class MemoryUserDAO implements UserDAO {
 
-    private ArrayList<UserData> users = new ArrayList<>();
+    static ArrayList<UserData> users = new ArrayList<>();
 
     public MemoryUserDAO() {}
 

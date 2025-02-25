@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class MemoryGameDAO implements GameDAO {
 
-    private ArrayList<GameData> games = new ArrayList<>();
+    static ArrayList<GameData> games = new ArrayList<>();
 
     public MemoryGameDAO() {}
 
@@ -16,7 +16,7 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData getGame(int ID) {
+    public GameData getGameByID(int ID) {
         for (GameData game: games) {
             if (game.gameID() == ID) {
                 return game;
@@ -26,8 +26,26 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
+    public GameData getGameByName(String gameName) {
+        for (GameData game: games) {
+            if (game.gameName().equals(gameName)) {
+                return game;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public ArrayList<GameData> listGames() {
         return games;
+    }
+
+    @Override
+    public void joinGame(String playerColor, String username, int ID) {
+        GameData gameToJoin = getGameByID(ID);
+        if (playerColor.equals("WHITE")) {
+
+        }
     }
 
     @Override
