@@ -10,7 +10,11 @@ public class ClearService {
     private MemoryAuthDAO authDataAccess;
     private MemoryUserDAO userDataAccess;
 
-    public ClearService(){}
+    public ClearService(){
+        gameDataAccess = new MemoryGameDAO();
+        authDataAccess = new MemoryAuthDAO();
+        userDataAccess = new MemoryUserDAO();
+    }
 
     public void delete() {
         gameDataAccess.clear();

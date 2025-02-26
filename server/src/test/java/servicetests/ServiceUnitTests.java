@@ -13,26 +13,6 @@ import service.*;
 
 public class ServiceUnitTests {
 
-
-    //not ready yet
-    @Test
-    public void clearTest() {
-        MemoryUserDAO users = new MemoryUserDAO();
-        MemoryAuthDAO auths = new MemoryAuthDAO();
-        MemoryGameDAO games = new MemoryGameDAO();
-
-        UserData user = new UserData("","","");
-        AuthData auth = new AuthData("", "");
-        GameData game = new GameData(0, "", "", "", new ChessGame());
-
-        users.createUser(user);
-        auths.createAuth(auth);
-        games.createGame(game);
-
-        ClearService clear = new ClearService();
-        clear.delete();
-    }
-
     @Test
     public void registerTest() {
         UserService service = new UserService();
@@ -89,5 +69,60 @@ public class ServiceUnitTests {
         GameResult check = gameService.createGame(request);
 
         assert check != null;
+    }
+
+    @Test
+    public void listGamesTest() throws DataAccessException {
+        UserService userService = new UserService();
+        RegisterRequest register = new RegisterRequest("7", "8", "9");
+        userService.register(register);
+        LoginRequest login = new LoginRequest("7","8");
+        LoginResult loginResult = userService.login(login);
+        String auth = loginResult.authToken();
+        GameService gameService = new GameService();
+        GameRequest request = new GameRequest("newGame", auth);
+        gameService.createGame(request);
+        ListRequest list = new ListRequest(auth);
+        ListResult check = gameService.listGames(list);
+
+        assert !check.games().isEmpty();
+    }
+
+    @Test
+    public void joinGameTest() throws DataAccessException {
+        UserService userService = new UserService();
+        RegisterRequest register = new RegisterRequest("10", "11", "12");
+        userService.register(register);
+        LoginRequest login = new LoginRequest("10","11");
+        LoginResult loginResult = userService.login(login);
+        String auth = loginResult.authToken();
+        GameService gameService = new GameService();
+        GameRequest request = new GameRequest("myGame", auth);
+        GameResult game = gameService.createGame(request);
+        JoinRequest join = new JoinRequest("BLACK", game.gameID(), auth);
+        JoinResult check = gameService.joinGame(join);
+        ListRequest list = new ListRequest(auth);
+        ListResult gameList = gameService.listGames(list);
+
+
+        assert check != null && !gameList.games().isEmpty();
+    }
+
+    @Test
+    public void clearTest() {
+        MemoryUserDAO users = new MemoryUserDAO();
+        MemoryAuthDAO auths = new MemoryAuthDAO();
+        MemoryGameDAO games = new MemoryGameDAO();
+
+        UserData user = new UserData("","","");
+        AuthData auth = new AuthData("", "");
+        GameData game = new GameData(0, "", "", "", new ChessGame());
+
+        users.createUser(user);
+        auths.createAuth(auth);
+        games.createGame(game);
+
+        ClearService clear = new ClearService();
+        clear.delete();
     }
 }
