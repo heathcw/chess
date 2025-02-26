@@ -24,7 +24,7 @@ public class UserService {
         String tokenToAdd = UUID.randomUUID().toString();
         AuthData token = new AuthData(tokenToAdd, request.username());
 
-        if (check == null) {
+        if (check != null) {
             return null;
         }
 

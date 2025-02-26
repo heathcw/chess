@@ -15,7 +15,10 @@ public class GameService {
     private MemoryGameDAO gameDataAccess;
     private MemoryAuthDAO authDataAccess;
 
-    public GameService(){}
+    public GameService(){
+        gameDataAccess = new MemoryGameDAO();
+        authDataAccess = new MemoryAuthDAO();
+    }
 
     public ListResult listGames(ListRequest request) throws DataAccessException {
         try {
