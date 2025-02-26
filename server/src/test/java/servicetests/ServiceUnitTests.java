@@ -103,9 +103,21 @@ public class ServiceUnitTests {
         JoinResult check = gameService.joinGame(join);
         ListRequest list = new ListRequest(auth);
         ListResult gameList = gameService.listGames(list);
-
+        loginAndJoinTest(game.gameID());
 
         assert check != null && !gameList.games().isEmpty();
+    }
+
+    public void loginAndJoinTest(int id) throws DataAccessException{
+        UserService userService = new UserService();
+        GameService gameService = new GameService();
+        LoginRequest login = new LoginRequest("1","2");
+        LoginResult result = userService.login(login);
+        String auth = result.authToken();
+        JoinRequest join = new JoinRequest("WHITE", id, auth);
+        JoinResult check = gameService.joinGame(join);
+        ListRequest list = new ListRequest(auth);
+        ListResult gameList = gameService.listGames(list);
     }
 
     @Test
