@@ -33,4 +33,22 @@ public class HandlerClass {
         LogoutResult result = userService.logout(request);
         return serializer.toJson(result);
     }
+
+    public String listGamesHandler(String json) throws DataAccessException {
+        ListRequest request = serializer.fromJson(json, ListRequest.class);
+        ListResult result = gameService.listGames(request);
+        return serializer.toJson(result);
+    }
+
+    public String createGameHandler(String json) throws DataAccessException {
+        GameRequest request = serializer.fromJson(json, GameRequest.class);
+        GameResult result = gameService.createGame(request);
+        return serializer.toJson(result);
+    }
+
+    public String joinGameHandler(String json) throws DataAccessException {
+        JoinRequest request = serializer.fromJson(json, JoinRequest.class);
+        JoinResult result = gameService.joinGame(request);
+        return serializer.toJson(result);
+    }
 }
