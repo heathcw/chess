@@ -1,8 +1,13 @@
 package server;
 
+import com.google.gson.Gson;
+import handler.HandlerClass;
 import spark.*;
 
 public class Server {
+
+    private HandlerClass handler = new HandlerClass();
+    private Gson serializer = new Gson();
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -24,7 +29,11 @@ public class Server {
         Spark.awaitStop();
     }
 
-    private static void createRoutes() {
+    private void createRoutes() {
+        Spark.post("/user", this::register);
+    }
 
+    private Object register(Request req, Response res) {
+        return handler.registerHandler(req.body());
     }
 }
