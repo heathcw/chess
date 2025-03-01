@@ -37,13 +37,14 @@ public class HandlerClass {
     }
 
     public String listGamesHandler(String json) throws DataAccessException {
-        ListRequest request = serializer.fromJson(json, ListRequest.class);
+        ListRequest request = new ListRequest(json);
         ListResult result = gameService.listGames(request);
         return serializer.toJson(result);
     }
 
-    public String createGameHandler(String json) throws DataAccessException {
-        GameRequest request = serializer.fromJson(json, GameRequest.class);
+    public String createGameHandler(String json, String auth) throws DataAccessException {
+        GameRequest gameName = serializer.fromJson(json, GameRequest.class);
+        GameRequest request = new GameRequest(gameName.gameName(), auth);
         GameResult result = gameService.createGame(request);
         return serializer.toJson(result);
     }

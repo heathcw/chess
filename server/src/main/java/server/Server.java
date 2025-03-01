@@ -57,11 +57,11 @@ public class Server {
     }
 
     private Object listGames(Request req, Response res) throws DataAccessException {
-        return handler.listGamesHandler(req.body());
+        return handler.listGamesHandler(req.headers("Authorization"));
     }
 
     private Object createGame(Request req, Response res) throws DataAccessException {
-        return handler.createGameHandler(req.body());
+        return handler.createGameHandler(req.body(), req.headers("Authorization"));
     }
 
     private Object joinGame(Request req, Response res) throws DataAccessException {
