@@ -9,7 +9,7 @@ public interface GameDAO {
     GameData getGameByID(int ID);
     GameData getGameByName(String gameName);
     ArrayList<GameData> listGames();
-    void joinGame(String playerColor, String username, int ID);
+    void joinGame(String playerColor, String username, int ID) throws DataAccessException;
     void updateGame(GameData data);
     void clear();
 }

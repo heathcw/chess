@@ -61,20 +61,32 @@ public class Server {
         try {
             return handler.logoutHandler(req.headers("Authorization"));
         } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+            return exceptionHandler(res, e);
         }
     }
 
-    private Object listGames(Request req, Response res) throws DataAccessException {
-        return handler.listGamesHandler(req.headers("Authorization"));
+    private Object listGames(Request req, Response res) {
+        try {
+            return handler.listGamesHandler(req.headers("Authorization"));
+        } catch (DataAccessException e) {
+            return exceptionHandler(res, e);
+        }
     }
 
-    private Object createGame(Request req, Response res) throws DataAccessException {
-        return handler.createGameHandler(req.body(), req.headers("Authorization"));
+    private Object createGame(Request req, Response res) {
+        try {
+            return handler.createGameHandler(req.body(), req.headers("Authorization"));
+        } catch (DataAccessException e) {
+            return exceptionHandler(res, e);
+        }
     }
 
-    private Object joinGame(Request req, Response res) throws DataAccessException {
-        return handler.joinGameHandler(req.body(), req.headers("Authorization"));
+    private Object joinGame(Request req, Response res) {
+        try {
+            return handler.joinGameHandler(req.body(), req.headers("Authorization"));
+        } catch (DataAccessException e) {
+            return exceptionHandler(res, e);
+        }
     }
 
     private Object clear(Request req, Response res) {

@@ -21,20 +21,18 @@ public class GameService {
     }
 
     public ListResult listGames(ListRequest request) throws DataAccessException {
-        try {
-            authDataAccess.getAuth(request.authToken());
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+        AuthData data = authDataAccess.getAuth(request.authToken());
+        if (data == null) {
+            throw new DataAccessException("Error: unauthorized");
         }
         ArrayList<GameData> games = gameDataAccess.listGames();
         return new ListResult(games);
     }
 
     public GameResult createGame(GameRequest request) throws DataAccessException {
-        try {
-            authDataAccess.getAuth(request.authToken());
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+        AuthData data = authDataAccess.getAuth(request.authToken());
+        if (data == null) {
+            throw new DataAccessException("Error: unauthorized");
         }
         GameData check = gameDataAccess.getGameByName(request.gameName());
         if (check != null) {
@@ -48,10 +46,9 @@ public class GameService {
     }
 
     public JoinResult joinGame(JoinRequest request) throws DataAccessException {
-        try {
-           AuthData auth = authDataAccess.getAuth(request.authToken());
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+        AuthData data = authDataAccess.getAuth(request.authToken());
+        if (data == null) {
+            throw new DataAccessException("Error: unauthorized");
         }
         AuthData auth = authDataAccess.getAuth(request.authToken());
         gameDataAccess.joinGame(request.playerColor(), auth.username(), request.gameID());

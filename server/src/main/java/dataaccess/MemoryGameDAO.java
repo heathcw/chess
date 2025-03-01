@@ -41,14 +41,26 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void joinGame(String playerColor, String username, int ID) {
+    public void joinGame(String playerColor, String username, int ID) throws DataAccessException {
         GameData gameToJoin = getGameByID(ID);
+        if (gameToJoin == null) {
+            throw new DataAccessException("Error: game not found");
+        }
         GameData changeGame;
         if (playerColor.equals("WHITE")) {
+            if (!gameToJoin.whiteUsername().isEmpty()) {
+                throw new DataAccessException("Error: already taken");
+            }
             changeGame = new GameData(ID, username, gameToJoin.blackUsername(), gameToJoin.gameName(), gameToJoin.game());
         }
-        else {
+        else if (playerColor.equals("BLACK")){
+            if (!gameToJoin.blackUsername().isEmpty()) {
+                throw new DataAccessException("Error: already taken");
+            }
             changeGame = new GameData(ID, gameToJoin.whiteUsername(), username, gameToJoin.gameName(), gameToJoin.game());
+        }
+        else {
+            throw new DataAccessException("Error: bad request");
         }
         games.set(games.indexOf(gameToJoin),changeGame);
     }
