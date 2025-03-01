@@ -49,13 +49,15 @@ public class HandlerClass {
         return serializer.toJson(result);
     }
 
-    public String joinGameHandler(String json) throws DataAccessException {
-        JoinRequest request = serializer.fromJson(json, JoinRequest.class);
+    public String joinGameHandler(String json, String auth) throws DataAccessException {
+        JoinRequest colorAndID = serializer.fromJson(json, JoinRequest.class);
+        JoinRequest request = new JoinRequest(colorAndID.playerColor(), colorAndID.gameID(), auth);
         JoinResult result = gameService.joinGame(request);
         return serializer.toJson(result);
     }
 
-    public void clearHandler() {
-        clearService.delete();
+    public String clearHandler() {
+        ClearResult result = clearService.delete();
+        return serializer.toJson(result);
     }
 }

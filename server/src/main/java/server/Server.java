@@ -65,11 +65,10 @@ public class Server {
     }
 
     private Object joinGame(Request req, Response res) throws DataAccessException {
-        return handler.joinGameHandler(req.body());
+        return handler.joinGameHandler(req.body(), req.headers("Authorization"));
     }
 
     private Object clear(Request req, Response res) {
-        handler.clearHandler();
-        return res;
+        return handler.clearHandler();
     }
 }
