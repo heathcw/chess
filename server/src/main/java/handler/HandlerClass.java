@@ -18,13 +18,16 @@ public class HandlerClass {
         serializer = new Gson();
     }
 
-    public String registerHandler(String json) {
+    public String registerHandler(String json) throws DataAccessException {
         RegisterRequest request = serializer.fromJson(json, RegisterRequest.class);
+        if (request.username() == null || request.password() == null || request.email() == null) {
+            throw new DataAccessException("Error: bad request");
+        }
         RegisterResult result = userService.register(request);
         return serializer.toJson(result);
     }
 
-    public String loginHandler(String json) {
+    public String loginHandler(String json) throws DataAccessException {
         LoginRequest request = serializer.fromJson(json, LoginRequest.class);
         LoginResult result = userService.login(request);
         return serializer.toJson(result);

@@ -9,6 +9,7 @@ import spark.*;
 public class Server {
 
     private HandlerClass handler = new HandlerClass();
+    private Gson serializer = new Gson();
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -41,14 +42,22 @@ public class Server {
     }
 
     private Object register(Request req, Response res) {
-        return handler.registerHandler(req.body());
+        try {
+            return handler.registerHandler(req.body());
+        } catch (DataAccessException e) {
+            return exceptionHandler(res, e);
+        }
     }
 
     private Object login(Request req, Response res) {
-        return handler.loginHandler(req.body());
+        try {
+            return handler.loginHandler(req.body());
+        } catch (DataAccessException e) {
+            return exceptionHandler(res, e);
+        }
     }
 
-    private Object logout(Request req, Response res) throws DataAccessException {
+    private Object logout(Request req, Response res) {
         try {
             return handler.logoutHandler(req.headers("Authorization"));
         } catch (DataAccessException e) {
@@ -70,5 +79,19 @@ public class Server {
 
     private Object clear(Request req, Response res) {
         return handler.clearHandler();
+    }
+
+    private Object exceptionHandler(Response res, DataAccessException e) {
+        if (e.getMessage().contains("bad request")) {
+            res.status(400);
+        } else if (e.getMessage().contains("unauthorized")) {
+            res.status(401);
+        } else if (e.getMessage().contains("already taken")) {
+            res.status(403);
+        } else {
+            res.status(500);
+        }
+        res.body(e.getMessage());
+        return serializer.toJson(res.body());
     }
 }

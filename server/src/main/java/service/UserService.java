@@ -6,6 +6,7 @@ import dataaccess.MemoryUserDAO;
 import model.AuthData;
 import model.UserData;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
@@ -18,14 +19,14 @@ public class UserService {
         authDataAccess = new MemoryAuthDAO();
     }
 
-    public RegisterResult register(RegisterRequest request) {
+    public RegisterResult register(RegisterRequest request) throws DataAccessException {
         UserData data = new UserData(request.username(), request.password(), request.email());
         UserData check = userDataAccess.getUser(request.username());
         String tokenToAdd = UUID.randomUUID().toString();
         AuthData token = new AuthData(tokenToAdd, request.username());
 
         if (check != null) {
-            return null;
+            throw new DataAccessException("Error: already taken");
         }
 
         userDataAccess.createUser(data);
@@ -34,10 +35,13 @@ public class UserService {
         return new RegisterResult(request.username(), tokenToAdd);
     }
 
-    public LoginResult login(LoginRequest request) {
+    public LoginResult login(LoginRequest request) throws DataAccessException {
         UserData data = userDataAccess.getUser(request.username());
         if (data == null) {
-            return null;
+            throw new DataAccessException("Error: not found");
+        }
+        if (!Objects.equals(request.password(), data.password())) {
+            throw new DataAccessException("Error: unauthorized");
         }
 
         String tokenToAdd = UUID.randomUUID().toString();
@@ -50,7 +54,7 @@ public class UserService {
     public LogoutResult logout(LogoutRequest request) throws DataAccessException {
         AuthData data = authDataAccess.getAuth(request.authToken());
         if (data == null) {
-            return null;
+            throw new DataAccessException("Error: unauthorized");
         }
 
         authDataAccess.deleteAuth(data);
