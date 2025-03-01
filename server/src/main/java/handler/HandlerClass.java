@@ -8,11 +8,13 @@ public class HandlerClass {
 
     private UserService userService;
     private GameService gameService;
+    private ClearService clearService;
     private Gson serializer;
 
     public HandlerClass(){
         userService = new UserService();
         gameService = new GameService();
+        clearService = new ClearService();
         serializer = new Gson();
     }
 
@@ -29,7 +31,7 @@ public class HandlerClass {
     }
 
     public String logoutHandler(String json) throws DataAccessException {
-        LogoutRequest request = serializer.fromJson(json, LogoutRequest.class);
+        LogoutRequest request = new LogoutRequest(json);
         LogoutResult result = userService.logout(request);
         return serializer.toJson(result);
     }
@@ -50,5 +52,9 @@ public class HandlerClass {
         JoinRequest request = serializer.fromJson(json, JoinRequest.class);
         JoinResult result = gameService.joinGame(request);
         return serializer.toJson(result);
+    }
+
+    public void clearHandler() {
+        clearService.delete();
     }
 }
