@@ -8,7 +8,7 @@ import spark.*;
 
 public class Server {
 
-    private HandlerClass handler = new HandlerClass();
+    private final HandlerClass handler = new HandlerClass();
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);

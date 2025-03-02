@@ -6,9 +6,9 @@ import dataaccess.MemoryUserDAO;
 
 public class ClearService {
 
-    private MemoryGameDAO gameDataAccess;
-    private MemoryAuthDAO authDataAccess;
-    private MemoryUserDAO userDataAccess;
+    private final MemoryGameDAO gameDataAccess;
+    private final MemoryAuthDAO authDataAccess;
+    private final MemoryUserDAO userDataAccess;
 
     public ClearService(){
         gameDataAccess = new MemoryGameDAO();

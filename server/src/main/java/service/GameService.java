@@ -12,8 +12,8 @@ import java.util.Random;
 
 public class GameService {
 
-    private MemoryGameDAO gameDataAccess;
-    private MemoryAuthDAO authDataAccess;
+    private final MemoryGameDAO gameDataAccess;
+    private final MemoryAuthDAO authDataAccess;
 
     public GameService(){
         gameDataAccess = new MemoryGameDAO();

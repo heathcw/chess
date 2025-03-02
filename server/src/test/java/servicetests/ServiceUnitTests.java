@@ -23,6 +23,17 @@ public class ServiceUnitTests {
     }
 
     @Test
+    public void failedRegisterTest() {
+        UserService service = new UserService();
+        RegisterRequest request = new RegisterRequest("me",null,"1");
+        try {
+            service.register(request);
+        } catch (DataAccessException e) {
+            assert e.getMessage().equals("Error: bad request");
+        }
+    }
+
+    @Test
     public void loginTest() throws DataAccessException {
         UserService service = new UserService();
         RegisterRequest register = new RegisterRequest("they", "you", "we");
@@ -34,12 +45,14 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void failedLoginTest() throws DataAccessException {
+    public void failedLoginTest() {
         UserService service = new UserService();
         LoginRequest login = new LoginRequest("you", "me");
-        LoginResult result = service.login(login);
-
-        assert result == null;
+        try {
+            service.login(login);
+        } catch (DataAccessException e) {
+            assert e.getMessage().equals("Error: unauthorized");
+        }
     }
 
     @Test
@@ -54,6 +67,21 @@ public class ServiceUnitTests {
         LogoutResult check = service.logout(logout);
 
         assert check != null;
+    }
+
+    @Test
+    public void failedLogoutTest() throws DataAccessException {
+        UserService service = new UserService();
+        RegisterRequest register = new RegisterRequest("username", "password", "55");
+        service.register(register);
+        LoginRequest login = new LoginRequest("username","password");
+        service.login(login);
+        LogoutRequest logout = new LogoutRequest("1234");
+        try {
+            service.logout(logout);
+        } catch (DataAccessException e) {
+            assert e.getMessage().equals("Error: unauthorized");
+        }
     }
 
     @Test
@@ -72,6 +100,23 @@ public class ServiceUnitTests {
     }
 
     @Test
+    public void failedCreateGameTest() throws DataAccessException {
+        UserService userService = new UserService();
+        RegisterRequest register = new RegisterRequest("username1", "password1", "66");
+        userService.register(register);
+        LoginRequest login = new LoginRequest("username1","password1");
+        LoginResult loginResult = userService.login(login);
+        String auth = loginResult.authToken();
+        GameService gameService = new GameService();
+        GameRequest request = new GameRequest("name", auth);
+        try {
+            gameService.createGame(request);
+        } catch (DataAccessException e) {
+            assert e.getMessage().equals("Error: already exists");
+        }
+    }
+
+    @Test
     public void listGamesTest() throws DataAccessException {
         UserService userService = new UserService();
         RegisterRequest register = new RegisterRequest("7", "8", "9");
@@ -86,6 +131,16 @@ public class ServiceUnitTests {
         ListResult check = gameService.listGames(list);
 
         assert !check.games().isEmpty();
+    }
+
+    @Test
+    public void failedListGamesTest() {
+        try {
+            GameService gameService = new GameService();
+            gameService.listGames(new ListRequest("1234"));
+        } catch (DataAccessException e) {
+            assert e.getMessage().equals("Error: unauthorized");
+        }
     }
 
     @Test
@@ -108,6 +163,23 @@ public class ServiceUnitTests {
         assert check != null && !gameList.games().isEmpty();
     }
 
+    @Test
+    public void failedJoinGameTest() {
+        try {
+            UserService userService = new UserService();
+            RegisterRequest register = new RegisterRequest("username2", "password2", "121");
+            userService.register(register);
+            LoginRequest login = new LoginRequest("username2","password2");
+            LoginResult loginResult = userService.login(login);
+            String auth = loginResult.authToken();
+            GameService gameService = new GameService();
+            JoinRequest join = new JoinRequest("BLACK", 1, auth);
+            gameService.joinGame(join);
+        } catch (DataAccessException e) {
+            assert e.getMessage().equals("Error: game not found");
+        }
+    }
+
     public void loginAndJoinTest(int id) throws DataAccessException{
         UserService userService = new UserService();
         GameService gameService = new GameService();
@@ -115,9 +187,9 @@ public class ServiceUnitTests {
         LoginResult result = userService.login(login);
         String auth = result.authToken();
         JoinRequest join = new JoinRequest("WHITE", id, auth);
-        JoinResult check = gameService.joinGame(join);
+        gameService.joinGame(join);
         ListRequest list = new ListRequest(auth);
-        ListResult gameList = gameService.listGames(list);
+        gameService.listGames(list);
     }
 
     @Test

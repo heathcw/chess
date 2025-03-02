@@ -6,10 +6,10 @@ import service.*;
 
 public class HandlerClass {
 
-    private UserService userService;
-    private GameService gameService;
-    private ClearService clearService;
-    private Gson serializer;
+    private final UserService userService;
+    private final GameService gameService;
+    private final ClearService clearService;
+    private final Gson serializer;
 
     public HandlerClass(){
         userService = new UserService();

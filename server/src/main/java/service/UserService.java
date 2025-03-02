@@ -11,8 +11,8 @@ import java.util.UUID;
 
 public class UserService {
 
-    private MemoryUserDAO userDataAccess;
-    private MemoryAuthDAO authDataAccess;
+    private final MemoryUserDAO userDataAccess;
+    private final MemoryAuthDAO authDataAccess;
 
     public UserService() {
         userDataAccess = new MemoryUserDAO();
