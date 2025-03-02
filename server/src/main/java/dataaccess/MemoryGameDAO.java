@@ -48,13 +48,13 @@ public class MemoryGameDAO implements GameDAO {
         }
         GameData changeGame;
         if (playerColor.equals("WHITE")) {
-            if (!gameToJoin.whiteUsername().isEmpty()) {
+            if (gameToJoin.whiteUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
             changeGame = new GameData(ID, username, gameToJoin.blackUsername(), gameToJoin.gameName(), gameToJoin.game());
         }
         else if (playerColor.equals("BLACK")){
-            if (!gameToJoin.blackUsername().isEmpty()) {
+            if (gameToJoin.blackUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
             changeGame = new GameData(ID, gameToJoin.whiteUsername(), username, gameToJoin.gameName(), gameToJoin.game());

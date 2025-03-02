@@ -40,7 +40,7 @@ public class GameService {
         }
         Random rand = new Random();
         int ID = rand.nextInt((9999 - 100) + 1) + 10;
-        GameData gameToAdd = new GameData(ID, "","", request.gameName(), new ChessGame());
+        GameData gameToAdd = new GameData(ID, null,null, request.gameName(), new ChessGame());
         gameDataAccess.createGame(gameToAdd);
         return new GameResult(ID);
     }

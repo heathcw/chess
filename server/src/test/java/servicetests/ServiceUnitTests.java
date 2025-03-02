@@ -14,7 +14,7 @@ import service.*;
 public class ServiceUnitTests {
 
     @Test
-    public void registerTest() {
+    public void registerTest() throws DataAccessException {
         UserService service = new UserService();
         RegisterRequest request = new RegisterRequest("me","","");
         RegisterResult result = service.register(request);
@@ -23,7 +23,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void loginTest() {
+    public void loginTest() throws DataAccessException {
         UserService service = new UserService();
         RegisterRequest register = new RegisterRequest("they", "you", "we");
         service.register(register);
@@ -34,7 +34,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void failedLoginTest() {
+    public void failedLoginTest() throws DataAccessException {
         UserService service = new UserService();
         LoginRequest login = new LoginRequest("you", "me");
         LoginResult result = service.login(login);

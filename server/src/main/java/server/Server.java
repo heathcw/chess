@@ -9,7 +9,6 @@ import spark.*;
 public class Server {
 
     private HandlerClass handler = new HandlerClass();
-    private Gson serializer = new Gson();
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -45,7 +44,7 @@ public class Server {
         try {
             return handler.registerHandler(req.body());
         } catch (DataAccessException e) {
-            return exceptionHandler(res, e);
+            return handler.exceptionHandler(res, e);
         }
     }
 
@@ -53,7 +52,7 @@ public class Server {
         try {
             return handler.loginHandler(req.body());
         } catch (DataAccessException e) {
-            return exceptionHandler(res, e);
+            return handler.exceptionHandler(res, e);
         }
     }
 
@@ -61,7 +60,7 @@ public class Server {
         try {
             return handler.logoutHandler(req.headers("Authorization"));
         } catch (DataAccessException e) {
-            return exceptionHandler(res, e);
+            return handler.exceptionHandler(res, e);
         }
     }
 
@@ -69,7 +68,7 @@ public class Server {
         try {
             return handler.listGamesHandler(req.headers("Authorization"));
         } catch (DataAccessException e) {
-            return exceptionHandler(res, e);
+            return handler.exceptionHandler(res, e);
         }
     }
 
@@ -77,7 +76,7 @@ public class Server {
         try {
             return handler.createGameHandler(req.body(), req.headers("Authorization"));
         } catch (DataAccessException e) {
-            return exceptionHandler(res, e);
+            return handler.exceptionHandler(res, e);
         }
     }
 
@@ -85,25 +84,11 @@ public class Server {
         try {
             return handler.joinGameHandler(req.body(), req.headers("Authorization"));
         } catch (DataAccessException e) {
-            return exceptionHandler(res, e);
+            return handler.exceptionHandler(res, e);
         }
     }
 
     private Object clear(Request req, Response res) {
         return handler.clearHandler();
-    }
-
-    private Object exceptionHandler(Response res, DataAccessException e) {
-        if (e.getMessage().contains("bad request")) {
-            res.status(400);
-        } else if (e.getMessage().contains("unauthorized")) {
-            res.status(401);
-        } else if (e.getMessage().contains("already taken")) {
-            res.status(403);
-        } else {
-            res.status(500);
-        }
-        res.body(e.getMessage());
-        return serializer.toJson(res.body());
     }
 }

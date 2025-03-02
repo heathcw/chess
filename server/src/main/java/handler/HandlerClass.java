@@ -69,4 +69,19 @@ public class HandlerClass {
         ClearResult result = clearService.delete();
         return serializer.toJson(result);
     }
+
+    public String exceptionHandler(spark.Response res, DataAccessException e) {
+        if (e.getMessage().contains("bad request")) {
+            res.status(400);
+        } else if (e.getMessage().contains("unauthorized")) {
+            res.status(401);
+        } else if (e.getMessage().contains("already taken")) {
+            res.status(403);
+        } else {
+            res.status(500);
+        }
+        res.body(e.getMessage());
+        ErrorResult result = new ErrorResult(res.body());
+        return serializer.toJson(result);
+    }
 }

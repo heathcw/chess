@@ -38,7 +38,7 @@ public class UserService {
     public LoginResult login(LoginRequest request) throws DataAccessException {
         UserData data = userDataAccess.getUser(request.username());
         if (data == null) {
-            throw new DataAccessException("Error: not found");
+            throw new DataAccessException("Error: unauthorized");
         }
         if (!Objects.equals(request.password(), data.password())) {
             throw new DataAccessException("Error: unauthorized");
