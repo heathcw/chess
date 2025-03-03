@@ -3,7 +3,7 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class KnightMovesCalculator {
+public class KnightMovesCalculator extends MovesCalculator {
 
     private final ChessGame.TeamColor teamColor;
 
@@ -17,39 +17,29 @@ public class KnightMovesCalculator {
         int col = myPosition.getColumn() + 1;
 
         ChessPosition checkPosition = new ChessPosition(row + 2, col + 1);
-        addMove(checkPosition, board, myPosition, moveCollection);
+        addMoveKnightKing(checkPosition, board, myPosition, moveCollection, teamColor);
 
         checkPosition = new ChessPosition(row + 1, col + 2);
-        addMove(checkPosition, board, myPosition, moveCollection);
+        addMoveKnightKing(checkPosition, board, myPosition, moveCollection, teamColor);
 
         checkPosition = new ChessPosition(row - 1, col + 2);
-        addMove(checkPosition, board, myPosition, moveCollection);
+        addMoveKnightKing(checkPosition, board, myPosition, moveCollection, teamColor);
 
         checkPosition = new ChessPosition(row - 2, col + 1);
-        addMove(checkPosition, board, myPosition, moveCollection);
+        addMoveKnightKing(checkPosition, board, myPosition, moveCollection, teamColor);
 
         checkPosition = new ChessPosition(row - 2, col - 1);
-        addMove(checkPosition, board, myPosition, moveCollection);
+        addMoveKnightKing(checkPosition, board, myPosition, moveCollection, teamColor);
 
         checkPosition = new ChessPosition(row - 1, col - 2);
-        addMove(checkPosition, board, myPosition, moveCollection);
+        addMoveKnightKing(checkPosition, board, myPosition, moveCollection, teamColor);
 
         checkPosition = new ChessPosition(row + 1, col - 2);
-        addMove(checkPosition, board, myPosition, moveCollection);
+        addMoveKnightKing(checkPosition, board, myPosition, moveCollection, teamColor);
 
         checkPosition = new ChessPosition(row + 2, col - 1);
-        addMove(checkPosition, board, myPosition, moveCollection);
+        addMoveKnightKing(checkPosition, board, myPosition, moveCollection, teamColor);
 
         return moveCollection;
-    }
-
-    private void addMove(ChessPosition checkPosition, ChessBoard board, ChessPosition myPosition, Collection<ChessMove> myCollection) {
-        if (checkPosition.getRow() >= 8 || checkPosition.getRow() < 0 || checkPosition.getColumn() >= 8 || checkPosition.getColumn() < 0) {
-            return;
-        }
-        if (board.getPiece(checkPosition) == null || board.getPiece(checkPosition).getTeamColor() != this.teamColor) {
-            ChessMove move = new ChessMove(myPosition, checkPosition, null);
-            myCollection.add(move);
-        }
     }
 }

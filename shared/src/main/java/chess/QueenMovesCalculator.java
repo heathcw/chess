@@ -1,6 +1,5 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class QueenMovesCalculator {
@@ -12,7 +11,7 @@ public class QueenMovesCalculator {
     }
 
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> moveCollection = new ArrayList<>();
+        Collection<ChessMove> moveCollection;
 
         BishopMovesCalculator diagonalMoves = new BishopMovesCalculator(this.teamColor);
         RookMovesCalculator perpendicularMoves = new RookMovesCalculator(this.teamColor);
