@@ -39,10 +39,10 @@ public class GameService {
             throw new DataAccessException("Error: Game already exists");
         }
         Random rand = new Random();
-        int ID = rand.nextInt((9999 - 100) + 1) + 10;
-        GameData gameToAdd = new GameData(ID, null,null, request.gameName(), new ChessGame());
+        int id = rand.nextInt((9999 - 100) + 1) + 10;
+        GameData gameToAdd = new GameData(id, null,null, request.gameName(), new ChessGame());
         gameDataAccess.createGame(gameToAdd);
-        return new GameResult(ID);
+        return new GameResult(id);
     }
 
     public JoinResult joinGame(JoinRequest request) throws DataAccessException {

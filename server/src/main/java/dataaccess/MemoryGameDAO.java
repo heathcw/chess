@@ -16,9 +16,9 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData getGameByID(int ID) {
+    public GameData getGameByID(int id) {
         for (GameData game: games) {
-            if (game.gameID() == ID) {
+            if (game.gameID() == id) {
                 return game;
             }
         }
@@ -41,8 +41,8 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void joinGame(String playerColor, String username, int ID) throws DataAccessException {
-        GameData gameToJoin = getGameByID(ID);
+    public void joinGame(String playerColor, String username, int id) throws DataAccessException {
+        GameData gameToJoin = getGameByID(id);
         if (gameToJoin == null) {
             throw new DataAccessException("Error: game not found");
         }
@@ -51,13 +51,13 @@ public class MemoryGameDAO implements GameDAO {
             if (gameToJoin.whiteUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
-            changeGame = new GameData(ID, username, gameToJoin.blackUsername(), gameToJoin.gameName(), gameToJoin.game());
+            changeGame = new GameData(id, username, gameToJoin.blackUsername(), gameToJoin.gameName(), gameToJoin.game());
         }
         else if (playerColor.equals("BLACK")){
             if (gameToJoin.blackUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
-            changeGame = new GameData(ID, gameToJoin.whiteUsername(), username, gameToJoin.gameName(), gameToJoin.game());
+            changeGame = new GameData(id, gameToJoin.whiteUsername(), username, gameToJoin.gameName(), gameToJoin.game());
         }
         else {
             throw new DataAccessException("Error: bad request");
