@@ -60,12 +60,7 @@ public class PawnMovesCalculator {
             return;
         }
         if (board.getPiece(checkPosition) != null && board.getPiece(checkPosition).getTeamColor() != this.teamColor) {
-            if (checkPosition.getRow() == end) {
-                promotionMove(checkPosition, myPosition, myCollection);
-            } else {
-                ChessMove move = new ChessMove(myPosition, checkPosition, null);
-                myCollection.add(move);
-            }
+            add(checkPosition, myPosition, myCollection, end);
         }
     }
 
@@ -74,16 +69,11 @@ public class PawnMovesCalculator {
             return;
         }
         if (board.getPiece(checkPosition) == null) {
-            if (checkPosition.getRow() == end) {
-                promotionMove(checkPosition, myPosition, myCollection);
-            } else {
-                ChessMove move = new ChessMove(myPosition, checkPosition, null);
-                myCollection.add(move);
-            }
+            add(checkPosition, myPosition, myCollection, end);
         }
     }
 
-    private void promotionMove (ChessPosition checkPosition, ChessPosition myPosition, Collection<ChessMove> myCollection) {
+    private void promotion(ChessPosition checkPosition, ChessPosition myPosition, Collection<ChessMove> myCollection) {
         ChessMove move = new ChessMove(myPosition, checkPosition, ChessPiece.PieceType.QUEEN);
         myCollection.add(move);
         move = new ChessMove(myPosition, checkPosition, ChessPiece.PieceType.BISHOP);
@@ -92,5 +82,15 @@ public class PawnMovesCalculator {
         myCollection.add(move);
         move = new ChessMove(myPosition, checkPosition, ChessPiece.PieceType.KNIGHT);
         myCollection.add(move);
+    }
+
+    private void add(ChessPosition checkPosition, ChessPosition myPosition, Collection<ChessMove> myCollection,
+                     int end) {
+        if (checkPosition.getRow() == end) {
+            promotion(checkPosition, myPosition, myCollection);
+        } else {
+            ChessMove move = new ChessMove(myPosition, checkPosition, null);
+            myCollection.add(move);
+        }
     }
 }
