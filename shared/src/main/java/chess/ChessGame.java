@@ -50,7 +50,7 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        Collection<ChessMove> moveCollection = new ArrayList<>();
+        Collection<ChessMove> moveCollection;
         ChessPiece pieceToMove = this.board.getPiece(startPosition);
         if (pieceToMove == null) {
             return null;

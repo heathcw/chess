@@ -5,7 +5,7 @@ import java.util.Collection;
 
 public class QueenMovesCalculator {
 
-    private ChessGame.TeamColor teamColor;
+    private final ChessGame.TeamColor teamColor;
 
     public QueenMovesCalculator(ChessGame.TeamColor teamColor) {
         this.teamColor = teamColor;

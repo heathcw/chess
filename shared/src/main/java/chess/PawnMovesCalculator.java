@@ -5,7 +5,7 @@ import java.util.Collection;
 
 public class PawnMovesCalculator {
 
-    private ChessGame.TeamColor teamColor;
+    private final ChessGame.TeamColor teamColor;
 
     public PawnMovesCalculator(ChessGame.TeamColor teamColor) {
         this.teamColor = teamColor;
