@@ -62,7 +62,7 @@ public class ServiceUnitTests {
         LoginRequest login = new LoginRequest("1","2");
         LoginResult result = service.login(login);
         String auth = result.authToken();
-        LogoutRequest logout = new LogoutRequest(auth);
+        AuthRequest logout = new AuthRequest(auth);
         LogoutResult check = service.logout(logout);
 
         assert check != null;
@@ -75,7 +75,7 @@ public class ServiceUnitTests {
         service.register(register);
         LoginRequest login = new LoginRequest("username","password");
         service.login(login);
-        LogoutRequest logout = new LogoutRequest("1234");
+        AuthRequest logout = new AuthRequest("1234");
         try {
             service.logout(logout);
         } catch (DataAccessException e) {
@@ -126,7 +126,7 @@ public class ServiceUnitTests {
         GameService gameService = new GameService();
         GameRequest request = new GameRequest("newGame", auth);
         gameService.createGame(request);
-        ListRequest list = new ListRequest(auth);
+        AuthRequest list = new AuthRequest(auth);
         ListResult check = gameService.listGames(list);
 
         assert !check.games().isEmpty();
@@ -136,7 +136,7 @@ public class ServiceUnitTests {
     public void failedListGamesTest() {
         try {
             GameService gameService = new GameService();
-            gameService.listGames(new ListRequest("1234"));
+            gameService.listGames(new AuthRequest("1234"));
         } catch (DataAccessException e) {
             assert e.getMessage().equals("Error: unauthorized");
         }
@@ -155,7 +155,7 @@ public class ServiceUnitTests {
         GameResult game = gameService.createGame(request);
         JoinRequest join = new JoinRequest("BLACK", game.gameID(), auth);
         JoinResult check = gameService.joinGame(join);
-        ListRequest list = new ListRequest(auth);
+        AuthRequest list = new AuthRequest(auth);
         ListResult gameList = gameService.listGames(list);
         loginAndJoinTest(game.gameID());
 
@@ -187,7 +187,7 @@ public class ServiceUnitTests {
         String auth = result.authToken();
         JoinRequest join = new JoinRequest("WHITE", id, auth);
         gameService.joinGame(join);
-        ListRequest list = new ListRequest(auth);
+        AuthRequest list = new AuthRequest(auth);
         gameService.listGames(list);
     }
 

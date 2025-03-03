@@ -16,10 +16,10 @@ public class ClearService {
         userDataAccess = new MemoryUserDAO();
     }
 
-    public ClearResult delete() {
+    public LogoutResult delete() {
         gameDataAccess.clear();
         authDataAccess.clear();
         userDataAccess.clear();
-        return new ClearResult();
+        return new LogoutResult();
     }
 }

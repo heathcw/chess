@@ -34,13 +34,13 @@ public class HandlerClass {
     }
 
     public String logoutHandler(String json) throws DataAccessException {
-        LogoutRequest request = new LogoutRequest(json);
+        AuthRequest request = new AuthRequest(json);
         LogoutResult result = userService.logout(request);
         return serializer.toJson(result);
     }
 
     public String listGamesHandler(String json) throws DataAccessException {
-        ListRequest request = new ListRequest(json);
+        AuthRequest request = new AuthRequest(json);
         ListResult result = gameService.listGames(request);
         return serializer.toJson(result);
     }
@@ -66,7 +66,7 @@ public class HandlerClass {
     }
 
     public String clearHandler() {
-        ClearResult result = clearService.delete();
+        LogoutResult result = clearService.delete();
         return serializer.toJson(result);
     }
 

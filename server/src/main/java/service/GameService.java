@@ -20,7 +20,7 @@ public class GameService {
         authDataAccess = new MemoryAuthDAO();
     }
 
-    public ListResult listGames(ListRequest request) throws DataAccessException {
+    public ListResult listGames(AuthRequest request) throws DataAccessException {
         AuthData data = authDataAccess.getAuth(request.authToken());
         if (data == null) {
             throw new DataAccessException("Error: unauthorized");
