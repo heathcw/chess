@@ -1,4 +1,4 @@
-package servicetests;
+package service;
 
 import chess.ChessGame;
 import dataaccess.DataAccessException;
@@ -9,7 +9,6 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Test;
-import service.*;
 
 public class ServiceUnitTests {
 
