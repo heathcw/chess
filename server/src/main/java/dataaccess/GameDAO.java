@@ -10,6 +10,5 @@ public interface GameDAO {
     GameData getGameByName(String gameName);
     ArrayList<GameData> listGames();
     void joinGame(String playerColor, String username, int id) throws DataAccessException;
-    void updateGame(GameData data);
     void clear();
 }

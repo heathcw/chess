@@ -8,7 +8,8 @@ public class MemoryGameDAO implements GameDAO {
 
     static ArrayList<GameData> games = new ArrayList<>();
 
-    public MemoryGameDAO() {}
+    public MemoryGameDAO() {
+    }
 
     @Override
     public void createGame(GameData data) {
@@ -17,7 +18,7 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public GameData getGameByID(int id) {
-        for (GameData game: games) {
+        for (GameData game : games) {
             if (game.gameID() == id) {
                 return game;
             }
@@ -27,7 +28,7 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public GameData getGameByName(String gameName) {
-        for (GameData game: games) {
+        for (GameData game : games) {
             if (game.gameName().equals(gameName)) {
                 return game;
             }
@@ -52,22 +53,15 @@ public class MemoryGameDAO implements GameDAO {
                 throw new DataAccessException("Error: already taken");
             }
             changeGame = new GameData(id, username, gameToJoin.blackUsername(), gameToJoin.gameName(), gameToJoin.game());
-        }
-        else if (playerColor.equals("BLACK")){
+        } else if (playerColor.equals("BLACK")) {
             if (gameToJoin.blackUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
             changeGame = new GameData(id, gameToJoin.whiteUsername(), username, gameToJoin.gameName(), gameToJoin.game());
-        }
-        else {
+        } else {
             throw new DataAccessException("Error: bad request");
         }
-        games.set(games.indexOf(gameToJoin),changeGame);
-    }
-
-    @Override
-    public void updateGame(GameData data) {
-
+        games.set(games.indexOf(gameToJoin), changeGame);
     }
 
     @Override
