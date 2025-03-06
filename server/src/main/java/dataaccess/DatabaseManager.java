@@ -48,13 +48,15 @@ public class DatabaseManager {
         }
     }
 
-    public void configureDatabase() throws DataAccessException {
+    public Connection configureDatabase() throws DataAccessException {
+        createDatabase();
         try (var conn = getConnection()) {
             for (var statement : createStatements) {
                 try (var preparedStatement = conn.prepareStatement(statement)) {
                     preparedStatement.executeUpdate();
                 }
             }
+            return conn;
         } catch (SQLException ex) {
             throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
         }
