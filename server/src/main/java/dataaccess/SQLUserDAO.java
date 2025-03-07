@@ -30,11 +30,26 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public UserData getUser(String username) {
-        return null;
+        String statement = "SELECT username, password, email FROM userData WHERE username =?";
+        try {
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.setString(1, username);
+
+            var response = preparedStatement.executeQuery();
+            return new UserData(response.getString("username"), response.getString("password"),
+                    response.getString("password"));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void clear() {
-
+        try {
+            var preparedStatement = conn.prepareStatement("DROP TABLE userData");
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

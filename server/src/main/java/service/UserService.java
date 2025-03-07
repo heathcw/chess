@@ -3,6 +3,7 @@ package service;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryUserDAO;
+import dataaccess.SQLUserDAO;
 import model.AuthData;
 import model.UserData;
 
@@ -13,10 +14,16 @@ public class UserService {
 
     private final MemoryUserDAO userDataAccess;
     private final MemoryAuthDAO authDataAccess;
+    private final SQLUserDAO userSQL;
 
     public UserService() {
         userDataAccess = new MemoryUserDAO();
         authDataAccess = new MemoryAuthDAO();
+        try {
+            userSQL = new SQLUserDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public RegisterResult register(RegisterRequest request) throws DataAccessException {
