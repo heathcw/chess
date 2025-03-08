@@ -1,5 +1,7 @@
 package dataaccess;
 
+import chess.ChessGame;
+import model.GameData;
 import model.UserData;
 import model.AuthData;
 import org.junit.jupiter.api.Test;
@@ -151,6 +153,18 @@ public class DataAccessUnitTests {
             AuthData check = authSQL.getAuth("token3");
             AuthData empty = new AuthData(null, null);
             assert empty.equals(check);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void createGameTest() {
+        try {
+            ChessGame game = new ChessGame();
+            SQLGameDAO gameSQL = new SQLGameDAO();
+            GameData add = new GameData(1, "user1", "user2", "name", game);
+            gameSQL.createGame(add);
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
