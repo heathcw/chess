@@ -2,7 +2,6 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import model.AuthData;
 import model.GameData;
 
 import java.sql.Connection;
@@ -132,7 +131,32 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void joinGame(String playerColor, String username, int id) throws DataAccessException {
+        String statement;
+        GameData check = getGameByID(id);
+        if (playerColor.equals("WHITE")) {
+            if (check.whiteUsername() != null) {
+                throw new DataAccessException("Error: already taken");
+            }
+            statement = "UPDATE gameData SET whiteUsername = ? WHERE id = ?";
+        } else if (playerColor.equals("BLACK")) {
+            if (check.blackUsername() != null) {
+                throw new DataAccessException("Error: already taken");
+            }
+            statement = "UPDATE gameData SET blackUsername = ? WHERE id = ?";
+        } else {
+            throw new DataAccessException("Error: bad request");
+        }
 
+        try {
+            conn = manager.getConnection();
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.setString(1, username);
+            preparedStatement.setInt(2, id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

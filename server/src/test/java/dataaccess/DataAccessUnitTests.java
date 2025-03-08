@@ -245,4 +245,30 @@ public class DataAccessUnitTests {
             throw new RuntimeException(e);
         }
     }
+
+    @Test
+    public void joinGameTest() {
+        try {
+            SQLGameDAO gameSQL = new SQLGameDAO();
+            GameData add = new GameData(102, null, null, "name3", new ChessGame());
+            gameSQL.createGame(add);
+            gameSQL.joinGame("WHITE", "user1", 102);
+            GameData check = gameSQL.getGameByID(102);
+            assert check.whiteUsername().equals("user1");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void failedJoinGameTest() {
+        try {
+            SQLGameDAO gameSQL = new SQLGameDAO();
+            GameData add = new GameData(103, null, "taken", "name4", new ChessGame());
+            gameSQL.createGame(add);
+            gameSQL.joinGame("BLACK", "user1", 103);
+        } catch (DataAccessException e) {
+            assert e.getMessage().equals("Error: already taken");
+        }
+    }
 }
