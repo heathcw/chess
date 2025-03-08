@@ -6,6 +6,8 @@ import model.UserData;
 import model.AuthData;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+
 public class DataAccessUnitTests {
 
     @Test
@@ -165,6 +167,80 @@ public class DataAccessUnitTests {
             SQLGameDAO gameSQL = new SQLGameDAO();
             GameData add = new GameData(1, "user1", "user2", "name", game);
             gameSQL.createGame(add);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void failedCreateGameTest() {
+        try {
+            SQLGameDAO gameSQL = new SQLGameDAO();
+            GameData add = new GameData(0, null, null, "name", null);
+            gameSQL.createGame(add);
+        } catch (DataAccessException | RuntimeException e) {
+            assert e.getMessage().equals("java.sql.SQLIntegrityConstraintViolationException: Column 'game' cannot be null");
+        }
+    }
+
+    @Test
+    public void getGameByIDTest() {
+        try {
+            SQLGameDAO gameSQL = new SQLGameDAO();
+            GameData add = new GameData(3, "white", "black", "wvb", new ChessGame());
+            gameSQL.createGame(add);
+            GameData check = gameSQL.getGameByID(3);
+            assert check.gameID() == add.gameID();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void failedGetGameByIDTest() {
+        try {
+            SQLGameDAO gameSQL = new SQLGameDAO();
+            GameData check = gameSQL.getGameByID(20);
+            GameData empty = new GameData(0, null, null, null, null);
+            assert empty.equals(check);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void getGameByNameTest() {
+        try {
+            SQLGameDAO gameSQL = new SQLGameDAO();
+            GameData add = new GameData(5, "white", "black", "bvw", new ChessGame());
+            gameSQL.createGame(add);
+            GameData check = gameSQL.getGameByName("bvw");
+            assert check.gameID() == add.gameID();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void failedGetGameByNameTest() {
+        try {
+            SQLGameDAO gameSQL = new SQLGameDAO();
+            GameData check = gameSQL.getGameByName("empty");
+            GameData empty = new GameData(0, null, null, null, null);
+            assert empty.equals(check);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void listGamesTest() {
+        try {
+            SQLGameDAO gameSQL = new SQLGameDAO();
+            GameData add = new GameData(101, "white1", "black1", "name1", new ChessGame());
+            gameSQL.createGame(add);
+            ArrayList<GameData> check = gameSQL.listGames();
+            assert !check.isEmpty();
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }

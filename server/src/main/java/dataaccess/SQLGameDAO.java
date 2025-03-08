@@ -1,6 +1,8 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
+import model.AuthData;
 import model.GameData;
 
 import java.sql.Connection;
@@ -41,17 +43,91 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public GameData getGameByID(int id) {
-        return null;
+        String statement = "SELECT id, whiteUsername, blackUsername, gameName, game FROM gameData WHERE id =?";
+        try {
+            var serializer = new Gson();
+            conn = manager.getConnection();
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.setInt(1, id);
+
+            var response = preparedStatement.executeQuery();
+            int gameID = 0;
+            String whiteUsername = null;
+            String blackUsername = null;
+            String gameName = null;
+            ChessGame game = null;
+            String json = null;
+            while (response.next()) {
+                gameID = response.getInt("id");
+                whiteUsername = response.getString("whiteUsername");
+                blackUsername = response.getString("blackUsername");
+                gameName = response.getString("gameName");
+                json = response.getString("game");
+            }
+            if (json != null) {
+                game = serializer.fromJson(json, ChessGame.class);
+            }
+            return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public GameData getGameByName(String gameName) {
-        return null;
+        String statement = "SELECT id, whiteUsername, blackUsername, gameName, game FROM gameData WHERE gameName =?";
+        try {
+            var serializer = new Gson();
+            conn = manager.getConnection();
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.setString(1, gameName);
+
+            var response = preparedStatement.executeQuery();
+            int gameID = 0;
+            String whiteUsername = null;
+            String blackUsername = null;
+            String name = null;
+            ChessGame game = null;
+            String json = null;
+            while (response.next()) {
+                gameID = response.getInt("id");
+                whiteUsername = response.getString("whiteUsername");
+                blackUsername = response.getString("blackUsername");
+                name = response.getString("gameName");
+                json = response.getString("game");
+            }
+            if (json != null) {
+                game = serializer.fromJson(json, ChessGame.class);
+            }
+            return new GameData(gameID, whiteUsername, blackUsername, name, game);
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public ArrayList<GameData> listGames() {
-        return null;
+        ArrayList<GameData> returnList = new ArrayList<>();
+        String statement = "SELECT id, whiteUsername, blackUsername, gameName, game FROM gameData";
+        try {
+            var serializer = new Gson();
+            conn = manager.getConnection();
+            var preparedStatement = conn.prepareStatement(statement);
+
+            var response = preparedStatement.executeQuery();
+            while (response.next()) {
+                int gameID = response.getInt("id");
+                String whiteUsername = response.getString("whiteUsername");
+                String blackUsername = response.getString("blackUsername");
+                String name = response.getString("gameName");
+                String json = response.getString("game");
+                ChessGame game = serializer.fromJson(json, ChessGame.class);
+                returnList.add(new GameData(gameID, whiteUsername, blackUsername, name, game));
+            }
+            return returnList;
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
