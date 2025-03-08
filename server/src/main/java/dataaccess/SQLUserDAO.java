@@ -56,7 +56,7 @@ public class SQLUserDAO implements UserDAO {
     @Override
     public void clear() {
         try {
-            var preparedStatement = conn.prepareStatement("DROP TABLE userData");
+            var preparedStatement = conn.prepareStatement("DELETE FROM userData");
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
