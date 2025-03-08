@@ -7,23 +7,25 @@ import java.sql.SQLException;
 
 public class SQLUserDAO implements UserDAO {
 
-    private final Connection conn;
+    private final DatabaseManager manager;
+    private Connection conn;
 
     public SQLUserDAO() throws DataAccessException {
-        DatabaseManager manager = new DatabaseManager();
+        manager = new DatabaseManager();
         conn = manager.configureDatabase();
     }
     @Override
     public void createUser(UserData data) {
         String statement = "INSERT INTO userData (username, password, email) VALUES (?,?,?)";
         try {
+            conn = manager.getConnection();
             var preparedStatement = conn.prepareStatement(statement);
             preparedStatement.setString(1, data.username());
             preparedStatement.setString(2, data.password());
             preparedStatement.setString(3, data.email());
 
             preparedStatement.executeUpdate();
-        } catch (SQLException e) {
+        } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
         }
     }
@@ -32,13 +34,21 @@ public class SQLUserDAO implements UserDAO {
     public UserData getUser(String username) {
         String statement = "SELECT username, password, email FROM userData WHERE username =?";
         try {
+            conn = manager.getConnection();
             var preparedStatement = conn.prepareStatement(statement);
             preparedStatement.setString(1, username);
 
             var response = preparedStatement.executeQuery();
-            return new UserData(response.getString("username"), response.getString("password"),
-                    response.getString("password"));
-        } catch (SQLException e) {
+            String name = null;
+            String password = null;
+            String email = null;
+            while (response.next()) {
+                name = response.getString("username");
+                password = response.getString("password");
+                email = response.getString("email");
+            }
+            return new UserData(name, password, email);
+        } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
         }
     }

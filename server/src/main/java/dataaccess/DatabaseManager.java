@@ -65,24 +65,24 @@ public class DatabaseManager {
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  userData (
-              `username` VARCHAR(256) NOT NULL,
-              `password` VARCHAR(256) NOT NULL,
-              `email' VARCHAR(256) NOT NULL
+              username VARCHAR(256) NOT NULL,
+              password VARCHAR(256) NOT NULL,
+              email VARCHAR(256) NOT NULL
             )
             """,
             """
             CREATE TABLE IF NOT EXISTS  authData (
-              `authToken` VARCHAR(256) NOT NULL,
-              `username` VARCHAR(256) NOT NULL
+              authToken VARCHAR(256) NOT NULL,
+              username VARCHAR(256) NOT NULL
             )
             """,
             """
             CREATE TABLE IF NOT EXISTS  gameData (
-              `id` INT NOT NULL,
-              `whiteUsername` VARCHAR(256),
-              'blackUsername' VARCHAR(256),
-              'gameName' VARCHAR(256) NOT NULL,
-              'game' TEXT NOT NULL
+              id INT NOT NULL,
+              whiteUsername VARCHAR(256),
+              blackUsername VARCHAR(256),
+              gameName VARCHAR(256) NOT NULL,
+              game TEXT NOT NULL
             )
             """
     };
@@ -99,7 +99,7 @@ public class DatabaseManager {
      * }
      * </code>
      */
-    static Connection getConnection() throws DataAccessException {
+    public Connection getConnection() throws DataAccessException {
         try {
             var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
             conn.setCatalog(DATABASE_NAME);
