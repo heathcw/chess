@@ -27,7 +27,7 @@ public class UserService {
 
     public RegisterResult register(RegisterRequest request) throws DataAccessException {
         UserData data = new UserData(request.username(), request.password(), request.email());
-        UserData check = userDataAccess.getUser(request.username());
+        UserData check = userSQL.getUser(request.username());
         String tokenToAdd = UUID.randomUUID().toString();
         AuthData token = new AuthData(tokenToAdd, request.username());
 
@@ -35,14 +35,14 @@ public class UserService {
             throw new DataAccessException("Error: already taken");
         }
 
-        userDataAccess.createUser(data);
-        authDataAccess.createAuth(token);
+        userSQL.createUser(data);
+        authSQL.createAuth(token);
 
         return new RegisterResult(request.username(), tokenToAdd);
     }
 
     public LoginResult login(LoginRequest request) throws DataAccessException {
-        UserData data = userDataAccess.getUser(request.username());
+        UserData data = userSQL.getUser(request.username());
         if (data == null) {
             throw new DataAccessException("Error: unauthorized");
         }
@@ -52,18 +52,18 @@ public class UserService {
 
         String tokenToAdd = UUID.randomUUID().toString();
         AuthData token = new AuthData(tokenToAdd, request.username());
-        authDataAccess.createAuth(token);
+        authSQL.createAuth(token);
 
         return new LoginResult(request.username(), tokenToAdd);
     }
 
     public LogoutResult logout(AuthRequest request) throws DataAccessException {
-        AuthData data = authDataAccess.getAuth(request.authToken());
+        AuthData data = authSQL.getAuth(request.authToken());
         if (data == null) {
             throw new DataAccessException("Error: unauthorized");
         }
 
-        authDataAccess.deleteAuth(data);
+        authSQL.deleteAuth(data);
 
         return new LogoutResult();
     }

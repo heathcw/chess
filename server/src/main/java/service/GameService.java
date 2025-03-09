@@ -1,9 +1,7 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryGameDAO;
+import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 
@@ -14,44 +12,52 @@ public class GameService {
 
     private final MemoryGameDAO gameDataAccess;
     private final MemoryAuthDAO authDataAccess;
+    private final SQLAuthDAO authSQL;
+    private final SQLGameDAO gameSQL;
 
     public GameService(){
         gameDataAccess = new MemoryGameDAO();
         authDataAccess = new MemoryAuthDAO();
+        try {
+            gameSQL = new SQLGameDAO();
+            authSQL = new SQLAuthDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ListResult listGames(AuthRequest request) throws DataAccessException {
-        AuthData data = authDataAccess.getAuth(request.authToken());
+        AuthData data = authSQL.getAuth(request.authToken());
         if (data == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-        ArrayList<GameData> games = gameDataAccess.listGames();
+        ArrayList<GameData> games = gameSQL.listGames();
         return new ListResult(games);
     }
 
     public GameResult createGame(GameRequest request) throws DataAccessException {
-        AuthData data = authDataAccess.getAuth(request.authToken());
+        AuthData data = authSQL.getAuth(request.authToken());
         if (data == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-        GameData check = gameDataAccess.getGameByName(request.gameName());
+        GameData check = gameSQL.getGameByName(request.gameName());
         if (check != null) {
             throw new DataAccessException("Error: Game already exists");
         }
         Random rand = new Random();
         int id = rand.nextInt((9999 - 100) + 1) + 10;
         GameData gameToAdd = new GameData(id, null,null, request.gameName(), new ChessGame());
-        gameDataAccess.createGame(gameToAdd);
+        gameSQL.createGame(gameToAdd);
         return new GameResult(id);
     }
 
     public JoinResult joinGame(JoinRequest request) throws DataAccessException {
-        AuthData data = authDataAccess.getAuth(request.authToken());
+        AuthData data = authSQL.getAuth(request.authToken());
         if (data == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-        AuthData auth = authDataAccess.getAuth(request.authToken());
-        gameDataAccess.joinGame(request.playerColor(), auth.username(), request.gameID());
+        AuthData auth = authSQL.getAuth(request.authToken());
+        gameSQL.joinGame(request.playerColor(), auth.username(), request.gameID());
 
         return new JoinResult();
     }

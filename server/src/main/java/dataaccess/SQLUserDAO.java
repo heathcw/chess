@@ -47,6 +47,9 @@ public class SQLUserDAO implements UserDAO {
                 password = response.getString("password");
                 email = response.getString("email");
             }
+            if (name == null && password == null && email == null) {
+                return null;
+            }
             return new UserData(name, password, email);
         } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
