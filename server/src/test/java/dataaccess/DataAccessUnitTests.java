@@ -271,4 +271,19 @@ public class DataAccessUnitTests {
             assert e.getMessage().equals("Error: already taken");
         }
     }
+
+    @Test
+    public void gameClearTest() {
+        try {
+            SQLGameDAO gameSQL = new SQLGameDAO();
+            GameData add = new GameData(42, "black", "white", "nombre", new ChessGame());
+            gameSQL.createGame(add);
+            gameSQL.clear();
+            GameData check = gameSQL.getGameByID(42);
+            GameData empty = new GameData(0, null, null, null, null);
+            assert empty.equals(check);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

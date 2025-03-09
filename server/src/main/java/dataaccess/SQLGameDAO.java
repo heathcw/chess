@@ -161,6 +161,12 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void clear() {
-
+        try {
+            conn = manager.getConnection();
+            var preparedStatement = conn.prepareStatement("DELETE FROM gameData");
+            preparedStatement.executeUpdate();
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
