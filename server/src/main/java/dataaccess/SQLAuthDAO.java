@@ -45,6 +45,9 @@ public class SQLAuthDAO implements AuthDAO {
                 auth = response.getString("authToken");
                 username = response.getString("username");
             }
+            if (auth == null && username == null) {
+                return null;
+            }
             return new AuthData(auth, username);
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
