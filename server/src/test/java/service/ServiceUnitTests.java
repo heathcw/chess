@@ -10,6 +10,8 @@ import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Test;
 
+import java.sql.SQLException;
+
 public class ServiceUnitTests {
 
     @Test
@@ -24,11 +26,13 @@ public class ServiceUnitTests {
     @Test
     public void failedRegisterTest() {
         UserService service = new UserService();
-        RegisterRequest request = new RegisterRequest("me",null,"1");
+        RegisterRequest request = new RegisterRequest("new","old","1");
+        RegisterRequest request2 = new RegisterRequest("new","old","1");
         try {
             service.register(request);
+            service.register(request2);
         } catch (DataAccessException e) {
-            assert e.getMessage().equals("Error: bad request");
+            assert e.getMessage().equals("Error: already taken");
         }
     }
 
@@ -85,6 +89,8 @@ public class ServiceUnitTests {
 
     @Test
     public void createGameTest() throws DataAccessException {
+        ClearService clearService = new ClearService();
+        clearService.delete();
         UserService userService = new UserService();
         RegisterRequest register = new RegisterRequest("4", "5", "6");
         userService.register(register);
@@ -165,6 +171,8 @@ public class ServiceUnitTests {
     @Test
     public void failedJoinGameTest() {
         try {
+            ClearService clearService = new ClearService();
+            clearService.delete();
             UserService userService = new UserService();
             RegisterRequest register = new RegisterRequest("username2", "password2", "121");
             userService.register(register);

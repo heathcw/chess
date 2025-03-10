@@ -50,8 +50,7 @@ public class DataAccessUnitTests {
         try {
             SQLUserDAO userSQL = new SQLUserDAO();
             UserData check = userSQL.getUser("newUser");
-            UserData empty = new UserData(null, null, null);
-            assert empty.equals(check);
+            assert check == null;
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -65,8 +64,7 @@ public class DataAccessUnitTests {
             userSQL.createUser(add);
             userSQL.clear();
             UserData check = userSQL.getUser("user3");
-            UserData empty = new UserData(null, null, null);
-            assert empty.equals(check);
+            assert check == null;
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -201,8 +199,7 @@ public class DataAccessUnitTests {
         try {
             SQLGameDAO gameSQL = new SQLGameDAO();
             GameData check = gameSQL.getGameByID(20);
-            GameData empty = new GameData(0, null, null, null, null);
-            assert empty.equals(check);
+            assert check == null;
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -226,8 +223,7 @@ public class DataAccessUnitTests {
         try {
             SQLGameDAO gameSQL = new SQLGameDAO();
             GameData check = gameSQL.getGameByName("empty");
-            GameData empty = new GameData(0, null, null, null, null);
-            assert empty.equals(check);
+            assert check == null;
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -280,8 +276,7 @@ public class DataAccessUnitTests {
             gameSQL.createGame(add);
             gameSQL.clear();
             GameData check = gameSQL.getGameByID(42);
-            GameData empty = new GameData(0, null, null, null, null);
-            assert empty.equals(check);
+            assert check == null;
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }

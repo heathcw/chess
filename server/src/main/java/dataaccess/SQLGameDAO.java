@@ -54,7 +54,7 @@ public class SQLGameDAO implements GameDAO {
             String whiteUsername = null;
             String blackUsername = null;
             String gameName = null;
-            ChessGame game = null;
+            ChessGame game;
             String json = null;
             while (response.next()) {
                 gameID = response.getInt("id");
@@ -65,6 +65,8 @@ public class SQLGameDAO implements GameDAO {
             }
             if (json != null) {
                 game = serializer.fromJson(json, ChessGame.class);
+            } else {
+                return null;
             }
             return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
         } catch (SQLException | DataAccessException e) {
@@ -86,7 +88,7 @@ public class SQLGameDAO implements GameDAO {
             String whiteUsername = null;
             String blackUsername = null;
             String name = null;
-            ChessGame game = null;
+            ChessGame game;
             String json = null;
             while (response.next()) {
                 gameID = response.getInt("id");
@@ -97,6 +99,8 @@ public class SQLGameDAO implements GameDAO {
             }
             if (json != null) {
                 game = serializer.fromJson(json, ChessGame.class);
+            } else {
+                return null;
             }
             return new GameData(gameID, whiteUsername, blackUsername, name, game);
         } catch (SQLException | DataAccessException e) {
@@ -133,6 +137,9 @@ public class SQLGameDAO implements GameDAO {
     public void joinGame(String playerColor, String username, int id) throws DataAccessException {
         String statement;
         GameData check = getGameByID(id);
+        if (check == null) {
+            throw new DataAccessException("Error: game not found");
+        }
         if (playerColor.equals("WHITE")) {
             if (check.whiteUsername() != null) {
                 throw new DataAccessException("Error: already taken");

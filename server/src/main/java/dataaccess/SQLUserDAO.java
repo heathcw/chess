@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -20,8 +21,9 @@ public class SQLUserDAO implements UserDAO {
         try {
             conn = manager.getConnection();
             var preparedStatement = conn.prepareStatement(statement);
+            String hashPassword = BCrypt.hashpw(data.password(), BCrypt.gensalt());
             preparedStatement.setString(1, data.username());
-            preparedStatement.setString(2, data.password());
+            preparedStatement.setString(2, hashPassword);
             preparedStatement.setString(3, data.email());
 
             preparedStatement.executeUpdate();
@@ -59,9 +61,10 @@ public class SQLUserDAO implements UserDAO {
     @Override
     public void clear() {
         try {
+            conn = manager.getConnection();
             var preparedStatement = conn.prepareStatement("DELETE FROM userData");
             preparedStatement.executeUpdate();
-        } catch (SQLException e) {
+        } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
         }
     }
