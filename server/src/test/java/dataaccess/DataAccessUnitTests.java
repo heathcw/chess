@@ -5,6 +5,7 @@ import model.GameData;
 import model.UserData;
 import model.AuthData;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.ArrayList;
 
@@ -16,7 +17,8 @@ public class DataAccessUnitTests {
             SQLUserDAO userSQL = new SQLUserDAO();
             UserData add = new UserData("username", "password", "email");
             userSQL.createUser(add);
-            assert userSQL.getUser("username").equals(add);
+            UserData check = userSQL.getUser("username");
+            assert BCrypt.checkpw(add.password(), check.password());
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -39,7 +41,8 @@ public class DataAccessUnitTests {
             SQLUserDAO userSQL = new SQLUserDAO();
             UserData add = new UserData("user2", "pass2", "email2");
             userSQL.createUser(add);
-            assert userSQL.getUser("user2").equals(add);
+            UserData check = userSQL.getUser("user2");
+            assert BCrypt.checkpw(add.password(), check.password());
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
