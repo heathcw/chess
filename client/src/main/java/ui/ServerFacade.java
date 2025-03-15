@@ -3,6 +3,8 @@ package ui;
 import exception.ResponseException;
 import server.Server;
 import com.google.gson.Gson;
+import service.*;
+
 import java.net.*;
 import java.io.*;
 
@@ -16,6 +18,35 @@ public class ServerFacade {
         serverUrl = url;
     }
 
+    public RegisterResult register(RegisterRequest request) throws ResponseException {
+        var path = "/user";
+        return this.makeRequest("POST", path, request, RegisterResult.class);
+    }
+
+    public LoginResult login(LoginRequest request) throws ResponseException {
+        var path = "/session";
+        return this.makeRequest("POST", path, request, LoginResult.class);
+    }
+
+    public LogoutResult logout(AuthRequest request) throws ResponseException {
+        var path = "/session";
+        return this.makeRequest("DELETE", path, request, LogoutResult.class);
+    }
+
+    public ListResult listGames(AuthRequest request) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("GET", path, request, ListResult.class);
+    }
+
+    public GameResult createGame(GameRequest request) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("POST", path, request, GameResult.class);
+    }
+
+    public JoinResult joinGame(JoinRequest request) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("PUT", path, request, JoinResult.class);
+    }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
