@@ -1,7 +1,6 @@
 package ui;
 
 import exception.ResponseException;
-import server.Server;
 import com.google.gson.Gson;
 import service.*;
 
@@ -10,11 +9,9 @@ import java.io.*;
 
 public class ServerFacade {
 
-    private Server facade;
     private final String serverUrl;
 
     public ServerFacade(String url) {
-        facade = new Server();
         serverUrl = url;
     }
 
