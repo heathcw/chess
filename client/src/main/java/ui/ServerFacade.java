@@ -89,10 +89,6 @@ public class ServerFacade {
             if (request.getClass() == AuthRequest.class) {
                 http.setRequestProperty("Authorization", ((AuthRequest) request).authToken());
             }
-            String reqData = new Gson().toJson(request);
-            try (OutputStream reqBody = http.getOutputStream()) {
-                reqBody.write(reqData.getBytes());
-            }
         }
     }
 

@@ -95,8 +95,12 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void listGamesTest() {
-
+    public void listGamesEmptyTest() throws ResponseException {
+        RegisterRequest reg = new RegisterRequest("you", "me", "yes");
+        RegisterResult regResult = facade.register(reg);
+        AuthRequest request = new AuthRequest(regResult.authToken());
+        ListResult result = facade.listGames(request);
+        assert  result.games().isEmpty();
     }
 
 }
