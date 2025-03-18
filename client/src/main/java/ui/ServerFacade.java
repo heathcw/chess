@@ -2,10 +2,12 @@ package ui;
 
 import exception.ResponseException;
 import com.google.gson.Gson;
+import model.AuthData;
 import service.*;
 
 import java.net.*;
 import java.io.*;
+import java.util.Objects;
 
 public class ServerFacade {
 
@@ -45,6 +47,11 @@ public class ServerFacade {
         return this.makeRequest("PUT", path, request, JoinResult.class);
     }
 
+    public void clear() throws ResponseException {
+        var path = "/db";
+        makeRequest("DELETE", path, null, null);
+    }
+
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
@@ -52,7 +59,11 @@ public class ServerFacade {
             http.setRequestMethod(method);
             http.setDoOutput(true);
 
-            writeBody(request, http);
+            if ((method.equals("DELETE") && path.equals("/session")) || (method.equals("GET") && path.equals("/game"))) {
+                writeHeader(request, http);
+            } else {
+                writeBody(request, http);
+            }
             http.connect();
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
@@ -66,6 +77,18 @@ public class ServerFacade {
     private static void writeBody(Object request, HttpURLConnection http) throws IOException {
         if (request != null) {
             http.addRequestProperty("Content-Type", "application/json");
+            String reqData = new Gson().toJson(request);
+            try (OutputStream reqBody = http.getOutputStream()) {
+                reqBody.write(reqData.getBytes());
+            }
+        }
+    }
+
+    private static void writeHeader(Object request, HttpURLConnection http) throws IOException {
+        if (request != null) {
+            if (request.getClass() == AuthRequest.class) {
+                http.setRequestProperty("Authorization", ((AuthRequest) request).authToken());
+            }
             String reqData = new Gson().toJson(request);
             try (OutputStream reqBody = http.getOutputStream()) {
                 reqBody.write(reqData.getBytes());
