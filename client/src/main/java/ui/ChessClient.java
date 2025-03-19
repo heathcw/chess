@@ -12,12 +12,10 @@ public class ChessClient {
     private String user = null;
     private String authToken = null;
     private final ServerFacade server;
-    private final String serverUrl;
     private State state = State.SIGNEDOUT;
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
-        this.serverUrl = url;
     }
 
     public String eval(String input) {
@@ -31,6 +29,7 @@ public class ChessClient {
                 case "quit" -> "quit";
                 case "create" -> create(params);
                 case "list" -> list();
+                case "join" -> join(params);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -39,6 +38,7 @@ public class ChessClient {
     }
 
     public String register(String... params) throws ResponseException {
+        assertSignedOut();
         if (params.length == 3) {
             state = State.SIGNEDIN;
             RegisterRequest request = new RegisterRequest(params[0], params[1], params[2]);
@@ -51,6 +51,7 @@ public class ChessClient {
     }
 
     public String login(String... params) throws ResponseException {
+        assertSignedOut();
         if (params.length == 2) {
             state = State.SIGNEDIN;
             LoginRequest request = new LoginRequest(params[0], params[1]);
@@ -84,6 +85,17 @@ public class ChessClient {
         return list.toString();
     }
 
+    public String join(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length == 2) {
+            int id = Integer.parseInt(params[0]);
+            JoinRequest request = new JoinRequest(params[1], id, authToken);
+            server.joinGame(request);
+            return String.format("You joined game: %s.", request.gameID());
+        }
+        throw new ResponseException(400, "Expected: <ID> <WHITE|BLACK>");
+    }
+
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
@@ -107,6 +119,12 @@ public class ChessClient {
     private void assertSignedIn() throws ResponseException {
         if (state == State.SIGNEDOUT) {
             throw new ResponseException(400, "You must sign in");
+        }
+    }
+
+    private void assertSignedOut() throws ResponseException {
+        if (state == State.SIGNEDIN) {
+            throw new ResponseException(400, "You are already signed in");
         }
     }
 }
