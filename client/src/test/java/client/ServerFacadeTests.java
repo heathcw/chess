@@ -96,11 +96,84 @@ public class ServerFacadeTests {
 
     @Test
     public void listGamesEmptyTest() throws ResponseException {
+        facade.clear();
         RegisterRequest reg = new RegisterRequest("you", "me", "yes");
         RegisterResult regResult = facade.register(reg);
         AuthRequest request = new AuthRequest(regResult.authToken());
         ListResult result = facade.listGames(request);
-        assert  result.games().isEmpty();
+        assert result.games().isEmpty();
+    }
+
+    @Test
+    public void createGameTest() throws ResponseException {
+        RegisterRequest reg = new RegisterRequest("you1", "me1", "yes1");
+        RegisterResult regResult = facade.register(reg);
+        String auth = regResult.authToken();
+        GameRequest request = new GameRequest("game", auth);
+        GameResult result = facade.createGame(request);
+        assert result.gameID() != 0;
+    }
+
+    @Test
+    public void failedCreateGameTest() {
+        try {
+            GameRequest request = new GameRequest("game1", null);
+            GameResult result = facade.createGame(request);
+            assert result.gameID() != 0;
+        } catch (ResponseException e) {
+            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of \"java.util.HashMap.get(Object)\" is null");
+        }
+    }
+
+    @Test
+    public void listGamesTest() throws ResponseException {
+        RegisterRequest reg = new RegisterRequest("you2", "me2", "yes1");
+        RegisterResult regResult = facade.register(reg);
+        String auth = regResult.authToken();
+        GameRequest createReq = new GameRequest("game1", auth);
+        facade.createGame(createReq);
+        AuthRequest request = new AuthRequest(auth);
+        ListResult result = facade.listGames(request);
+        assert !result.games().isEmpty();
+    }
+
+    @Test
+    public void failedListGamesTest() {
+        AuthRequest empty = new AuthRequest(null);
+        try {
+            facade.listGames(empty);
+        } catch (ResponseException e) {
+            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of \"java.util.HashMap.get(Object)\" is null");
+        }
+    }
+
+    @Test
+    public void joinGameTest() throws ResponseException {
+        RegisterRequest reg = new RegisterRequest("you3", "me3", "yes1");
+        RegisterResult regResult = facade.register(reg);
+        String auth = regResult.authToken();
+        GameRequest createRequest = new GameRequest("game2", auth);
+        GameResult game = facade.createGame(createRequest);
+        JoinRequest request = new JoinRequest("WHITE", game.gameID(), auth);
+        JoinResult result = facade.joinGame(request);
+        JoinResult check = new JoinResult();
+        assert result.equals(check);
+    }
+
+    @Test
+    public void failedJoinGameTest() {
+        try {
+            RegisterRequest reg = new RegisterRequest("you4", "me4", "yes1");
+            RegisterResult regResult = facade.register(reg);
+            String auth = regResult.authToken();
+            GameRequest createRequest = new GameRequest("game3", auth);
+            GameResult game = facade.createGame(createRequest);
+            JoinRequest request = new JoinRequest("WHITE", game.gameID(), auth);
+            facade.joinGame(request);
+            facade.joinGame(request);
+        } catch (ResponseException e) {
+            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of \"java.util.HashMap.get(Object)\" is null");
+        }
     }
 
 }

@@ -2,7 +2,6 @@ package ui;
 
 import exception.ResponseException;
 import com.google.gson.Gson;
-import model.AuthData;
 import service.*;
 
 import java.net.*;
@@ -61,6 +60,9 @@ public class ServerFacade {
 
             if ((method.equals("DELETE") && path.equals("/session")) || (method.equals("GET") && path.equals("/game"))) {
                 writeHeader(request, http);
+            } else if ((method.equals("POST") || method.equals("PUT")) && path.equals("/game")) {
+                writeHeader(request, http);
+                writeBody(request, http);
             } else {
                 writeBody(request, http);
             }
@@ -76,6 +78,12 @@ public class ServerFacade {
 
     private static void writeBody(Object request, HttpURLConnection http) throws IOException {
         if (request != null) {
+            /** if (request.getClass() == GameRequest.class) {
+                request = new GameRequest(((GameRequest) request).gameName(), null);
+            }
+            if (request.getClass() == JoinRequest.class) {
+                request = new JoinRequest(((JoinRequest) request).playerColor(), ((JoinRequest) request).gameID(), null);
+            } **/
             http.addRequestProperty("Content-Type", "application/json");
             String reqData = new Gson().toJson(request);
             try (OutputStream reqBody = http.getOutputStream()) {
@@ -84,10 +92,16 @@ public class ServerFacade {
         }
     }
 
-    private static void writeHeader(Object request, HttpURLConnection http) throws IOException {
+    private static void writeHeader(Object request, HttpURLConnection http) {
         if (request != null) {
             if (request.getClass() == AuthRequest.class) {
                 http.setRequestProperty("Authorization", ((AuthRequest) request).authToken());
+            }
+            if (request.getClass() == GameRequest.class) {
+                http.setRequestProperty("Authorization", ((GameRequest) request).authToken());
+            }
+            if (request.getClass() == JoinRequest.class) {
+                http.setRequestProperty("Authorization", ((JoinRequest) request).authToken());
             }
         }
     }
