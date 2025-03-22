@@ -141,6 +141,7 @@ public class ChessClient {
     }
 
     private String createBoard() {
+        boolean white = true;
         String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
         String[] blackPieces = {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP,
                 BLACK_KNIGHT, BLACK_ROOK};
@@ -155,13 +156,20 @@ public class ChessClient {
 
         board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("8").append(" ");
         for (String piece: blackPieces) {
+            if (white) {
+                board.append(SET_BG_COLOR_WHITE);
+                white = false;
+            } else {
+                board.append(SET_BG_COLOR_RED);
+                white = true;
+            }
             board.append(piece);
         }
-        board.append(" ").append("8").append(" ").append(RESET_BG_COLOR).append('\n');
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("8").append(" ").append(RESET_BG_COLOR).append('\n');
 
         board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("7").append(" ");
-        board.append(BLACK_PAWN.repeat(8));
-        board.append(" ").append("7").append(" ").append(RESET_BG_COLOR).append('\n');
+        board.append((SET_BG_COLOR_RED + BLACK_PAWN + SET_BG_COLOR_WHITE + BLACK_PAWN).repeat(4));
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("7").append(" ").append(RESET_BG_COLOR).append('\n');
 
         board.append(boardRow(6));
         board.append(boardRow(4));
@@ -171,10 +179,18 @@ public class ChessClient {
         board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("2").append(" ").append(RESET_BG_COLOR).append('\n');
 
         board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("1").append(" ");
+        white = false;
         for (String piece: whitePieces) {
+            if (white) {
+                board.append(SET_BG_COLOR_WHITE);
+                white = false;
+            } else {
+                board.append(SET_BG_COLOR_RED);
+                white = true;
+            }
             board.append(piece);
         }
-        board.append(" ").append("1").append(" ").append(RESET_BG_COLOR).append('\n');
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("1").append(" ").append(RESET_BG_COLOR).append('\n');
 
         board.append(SET_BG_COLOR_LIGHT_GREY).append("   ");
         for (String letter: letters) {
