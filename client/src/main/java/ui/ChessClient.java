@@ -5,6 +5,7 @@ import java.util.*;
 import exception.ResponseException;
 import model.GameData;
 import service.*;
+import static ui.EscapeSequences.*;
 
 public class ChessClient {
 
@@ -32,6 +33,7 @@ public class ChessClient {
                 case "list" -> list();
                 case "join" -> join(params);
                 case "logout" -> logout();
+                case "debug" -> createBoard();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -102,7 +104,10 @@ public class ChessClient {
             int id = idMap.get(number);
             JoinRequest request = new JoinRequest(params[1].toUpperCase(), id, authToken);
             server.joinGame(request);
-            return String.format("You joined game: %s", number);
+            if (request.playerColor().equals("BLACK")) {
+                return new StringBuilder(createBoard()).reverse().toString();
+            }
+            return createBoard();
         }
         throw new ResponseException(400, "Expected: <ID> <WHITE|BLACK>");
     }
@@ -135,6 +140,61 @@ public class ChessClient {
                 """;
     }
 
+    private String createBoard() {
+        String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
+        String[] blackPieces = {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP,
+                BLACK_KNIGHT, BLACK_ROOK};
+        String[] whitePieces = {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING, WHITE_BISHOP,
+                WHITE_KNIGHT, WHITE_ROOK};
+        StringBuilder board = new StringBuilder();
+        board.append(SET_BG_COLOR_LIGHT_GREY).append("   ").append(SET_TEXT_BOLD).append(SET_TEXT_COLOR_BLACK);
+        for (String letter: letters) {
+            board.append(" ").append(letter).append('\u2003');
+        }
+        board.append("   ").append(RESET_BG_COLOR).append('\n');
+
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("8").append(" ");
+        for (String piece: blackPieces) {
+            board.append(piece);
+        }
+        board.append(" ").append("8").append(" ").append(RESET_BG_COLOR).append('\n');
+
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("7").append(" ");
+        board.append(BLACK_PAWN.repeat(8));
+        board.append(" ").append("7").append(" ").append(RESET_BG_COLOR).append('\n');
+
+        board.append(boardRow(6));
+        board.append(boardRow(4));
+
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("2").append(" ");
+        board.append((SET_BG_COLOR_WHITE + WHITE_PAWN + SET_BG_COLOR_RED + WHITE_PAWN).repeat(4));
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("2").append(" ").append(RESET_BG_COLOR).append('\n');
+
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("1").append(" ");
+        for (String piece: whitePieces) {
+            board.append(piece);
+        }
+        board.append(" ").append("1").append(" ").append(RESET_BG_COLOR).append('\n');
+
+        board.append(SET_BG_COLOR_LIGHT_GREY).append("   ");
+        for (String letter: letters) {
+            board.append(" ").append(letter).append('\u2003');
+        }
+        board.append("   ").append(RESET_BG_COLOR).append('\n');
+
+        return board.toString();
+    }
+
+    private String boardRow(int rowNumber) {
+        String firstNumber = Integer.toString(rowNumber);
+        String secondNumber = Integer.toString(rowNumber - 1);
+        String emptyRow = (SET_BG_COLOR_WHITE + EMPTY + SET_BG_COLOR_RED + EMPTY).repeat(4);
+        String reverseRow = (SET_BG_COLOR_RED + EMPTY + SET_BG_COLOR_WHITE + EMPTY).repeat(4);
+        return SET_BG_COLOR_LIGHT_GREY + " " + firstNumber + " " + emptyRow + SET_BG_COLOR_LIGHT_GREY + " "
+                + firstNumber + " " + RESET_BG_COLOR + '\n' + SET_BG_COLOR_LIGHT_GREY + " " + secondNumber + " "
+                + reverseRow + SET_BG_COLOR_LIGHT_GREY + " " + secondNumber + " " + RESET_BG_COLOR + '\n';
+    }
+
     private void assertSignedIn() throws ResponseException {
         if (state == State.SIGNEDOUT) {
             throw new ResponseException(400, "You must log in");
@@ -144,6 +204,12 @@ public class ChessClient {
     private void assertSignedOut() throws ResponseException {
         if (state == State.SIGNEDIN) {
             throw new ResponseException(400, "You are already logged in");
+        }
+    }
+
+    private void assertInGame() throws ResponseException {
+        if (state != State.INGAME) {
+            throw new ResponseException(400, "You must join a game");
         }
     }
 }
