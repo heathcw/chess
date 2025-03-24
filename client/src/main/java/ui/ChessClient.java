@@ -222,10 +222,4 @@ public class ChessClient {
             throw new ResponseException(400, "You are already logged in");
         }
     }
-
-    private void assertInGame() throws ResponseException {
-        if (state != State.INGAME) {
-            throw new ResponseException(400, "You must join a game");
-        }
-    }
 }

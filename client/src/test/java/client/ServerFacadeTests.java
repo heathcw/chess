@@ -46,7 +46,8 @@ public class ServerFacadeTests {
             facade.register(request);
         } catch (ResponseException e) {
             System.out.println(e.getMessage());
-            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of \"java.util.HashMap.get(Object)\" is null");
+            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of " +
+                    "\"java.util.HashMap.get(Object)\" is null");
         }
     }
 
@@ -68,7 +69,8 @@ public class ServerFacadeTests {
             facade.login(request);
         } catch (ResponseException e) {
             System.out.println(e.getMessage());
-            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of \"java.util.HashMap.get(Object)\" is null");
+            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of " +
+                    "\"java.util.HashMap.get(Object)\" is null");
         }
     }
 
@@ -90,7 +92,8 @@ public class ServerFacadeTests {
         try {
             facade.logout(request);
         } catch (ResponseException e) {
-            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of \"java.util.HashMap.get(Object)\" is null");
+            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of " +
+                    "\"java.util.HashMap.get(Object)\" is null");
         }
     }
 
@@ -121,7 +124,8 @@ public class ServerFacadeTests {
             GameResult result = facade.createGame(request);
             assert result.gameID() != 0;
         } catch (ResponseException e) {
-            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of \"java.util.HashMap.get(Object)\" is null");
+            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of " +
+                    "\"java.util.HashMap.get(Object)\" is null");
         }
     }
 
@@ -143,7 +147,8 @@ public class ServerFacadeTests {
         try {
             facade.listGames(empty);
         } catch (ResponseException e) {
-            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of \"java.util.HashMap.get(Object)\" is null");
+            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of " +
+                    "\"java.util.HashMap.get(Object)\" is null");
         }
     }
 
@@ -172,7 +177,8 @@ public class ServerFacadeTests {
             facade.joinGame(request);
             facade.joinGame(request);
         } catch (ResponseException e) {
-            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of \"java.util.HashMap.get(Object)\" is null");
+            assert e.getMessage().equals("Cannot invoke \"java.lang.Double.intValue()\" because the return value of " +
+                    "\"java.util.HashMap.get(Object)\" is null");
         }
     }
 
