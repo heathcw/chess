@@ -2,7 +2,7 @@ package ui;
 
 import exception.ResponseException;
 import com.google.gson.Gson;
-import service.*;
+import model.*;
 
 import java.net.*;
 import java.io.*;

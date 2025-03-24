@@ -2,6 +2,7 @@ package handler;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import model.*;
 import service.*;
 
 public class HandlerClass {

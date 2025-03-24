@@ -3,8 +3,8 @@ package ui;
 import java.util.*;
 
 import exception.ResponseException;
-import model.GameData;
-import service.*;
+import model.*;
+
 import static ui.EscapeSequences.*;
 
 public class ChessClient {

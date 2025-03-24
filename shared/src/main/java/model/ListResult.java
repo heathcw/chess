@@ -1,6 +1,4 @@
-package service;
-
-import model.GameData;
+package model;
 
 import java.util.ArrayList;
 

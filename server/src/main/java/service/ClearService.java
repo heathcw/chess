@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.*;
+import model.LogoutResult;
 
 public class ClearService {
 
