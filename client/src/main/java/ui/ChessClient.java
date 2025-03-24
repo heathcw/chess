@@ -33,7 +33,8 @@ public class ChessClient {
                 case "list" -> list();
                 case "join" -> join(params);
                 case "logout" -> logout();
-                case "debug" -> createBoard();
+                case "debug" -> createWhiteBoard();
+                case "black" -> createBlackBoard();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -105,9 +106,9 @@ public class ChessClient {
             JoinRequest request = new JoinRequest(params[1].toUpperCase(), id, authToken);
             server.joinGame(request);
             if (request.playerColor().equals("BLACK")) {
-                return new StringBuilder(createBoard()).reverse().toString();
+                return createBlackBoard();
             }
-            return createBoard();
+            return createWhiteBoard();
         }
         throw new ResponseException(400, "Expected: <ID> <WHITE|BLACK>");
     }
@@ -140,7 +141,7 @@ public class ChessClient {
                 """;
     }
 
-    private String createBoard() {
+    private String createWhiteBoard() {
         boolean white = true;
         String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
         String[] blackPieces = {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP,
@@ -191,6 +192,67 @@ public class ChessClient {
             board.append(piece);
         }
         board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("1").append(" ").append(RESET_BG_COLOR).append('\n');
+
+        board.append(SET_BG_COLOR_LIGHT_GREY).append("   ");
+        for (String letter: letters) {
+            board.append(" ").append(letter).append('\u2003');
+        }
+        board.append("   ").append(RESET_BG_COLOR).append('\n');
+
+        return board.toString();
+    }
+
+    private String createBlackBoard() {
+        boolean white = true;
+        String[] letters = {"h", "g", "f", "e", "d", "c", "b", "a"};
+        String[] blackPieces = {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_KING, BLACK_QUEEN, BLACK_BISHOP,
+                BLACK_KNIGHT, BLACK_ROOK};
+        String[] whitePieces = {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_KING, WHITE_QUEEN, WHITE_BISHOP,
+                WHITE_KNIGHT, WHITE_ROOK};
+        StringBuilder board = new StringBuilder();
+        board.append(SET_BG_COLOR_LIGHT_GREY).append("   ").append(SET_TEXT_BOLD).append(SET_TEXT_COLOR_BLACK);
+        for (String letter: letters) {
+            board.append(" ").append(letter).append('\u2003');
+        }
+        board.append("   ").append(RESET_BG_COLOR).append('\n');
+
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("1").append(" ");
+        for (String piece: whitePieces) {
+            if (white) {
+                board.append(SET_BG_COLOR_WHITE);
+                white = false;
+            } else {
+                board.append(SET_BG_COLOR_RED);
+                white = true;
+            }
+            board.append(piece);
+        }
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("1").append(" ").append(RESET_BG_COLOR).append('\n');
+
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("2").append(" ");
+        board.append((SET_BG_COLOR_RED + WHITE_PAWN + SET_BG_COLOR_WHITE + WHITE_PAWN).repeat(4));
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("2").append(" ").append(RESET_BG_COLOR).append('\n');
+
+        board.append(boardRow(3));
+        board.append(boardRow(5));
+
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("7").append(" ");
+        board.append((SET_BG_COLOR_WHITE + BLACK_PAWN + SET_BG_COLOR_RED + BLACK_PAWN).repeat(4));
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("7").append(" ").append(RESET_BG_COLOR).append('\n');
+
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("8").append(" ");
+        white = false;
+        for (String piece: blackPieces) {
+            if (white) {
+                board.append(SET_BG_COLOR_WHITE);
+                white = false;
+            } else {
+                board.append(SET_BG_COLOR_RED);
+                white = true;
+            }
+            board.append(piece);
+        }
+        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("8").append(" ").append(RESET_BG_COLOR).append('\n');
 
         board.append(SET_BG_COLOR_LIGHT_GREY).append("   ");
         for (String letter: letters) {
