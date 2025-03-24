@@ -40,10 +40,10 @@ public class ChessClient {
             };
         } catch (ResponseException ex) {
             if (ex.getStatusCode() != 400) {
-                return "There was an error\n" + help();
+                return SET_TEXT_COLOR_RED + "There was an error\n" + help();
             }
             else {
-                return ex.getMessage();
+                return SET_TEXT_COLOR_RED + ex.getMessage();
             }
         }
     }
@@ -108,6 +108,9 @@ public class ChessClient {
         assertSignedIn();
         if (params.length == 2) {
             int number = Integer.parseInt(params[0]);
+            if (number > idMap.size()) {
+                throw new ResponseException(400, "Cannot find game. List games again.");
+            }
             int id = idMap.get(number);
             JoinRequest request = new JoinRequest(params[1].toUpperCase(), id, authToken);
             server.joinGame(request);
@@ -123,6 +126,9 @@ public class ChessClient {
         assertSignedIn();
         if (params.length == 1) {
             int number = Integer.parseInt(params[0]);
+            if (number > idMap.size()) {
+                throw new ResponseException(400, "Cannot find game. List games again.");
+            }
             int id = idMap.get(number);
             System.out.printf("observing game: %s%n", number);
             return createWhiteBoard();
