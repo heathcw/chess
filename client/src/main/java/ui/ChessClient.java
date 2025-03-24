@@ -32,6 +32,7 @@ public class ChessClient {
                 case "create" -> create(params);
                 case "list" -> list();
                 case "join" -> join(params);
+                case "observe" -> observe(params);
                 case "logout" -> logout();
                 case "debug" -> createWhiteBoard();
                 case "black" -> createBlackBoard();
@@ -111,6 +112,17 @@ public class ChessClient {
             return createWhiteBoard();
         }
         throw new ResponseException(400, "Expected: <ID> <WHITE|BLACK>");
+    }
+
+    public String observe(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length == 1) {
+            int number = Integer.parseInt(params[0]);
+            int id = idMap.get(number);
+            System.out.printf("observing game: %s%n", number);
+            return createWhiteBoard();
+        }
+        throw new ResponseException(400, "Expected: <ID");
     }
 
     public String logout() throws ResponseException {
