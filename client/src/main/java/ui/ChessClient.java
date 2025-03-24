@@ -39,7 +39,12 @@ public class ChessClient {
                 default -> help();
             };
         } catch (ResponseException ex) {
-            return ex.getMessage();
+            if (ex.getStatusCode() != 400) {
+                return "There was an error\n" + help();
+            }
+            else {
+                return ex.getMessage();
+            }
         }
     }
 
