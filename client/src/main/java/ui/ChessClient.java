@@ -92,12 +92,21 @@ public class ChessClient {
         games.clear();
         idMap.clear();
         for (GameData game: result.games()) {
-            String[] add = {Integer.toString(number), game.gameName(), game.whiteUsername(), game.blackUsername()};
+            String white = game.whiteUsername();
+            String black = game.blackUsername();
+            if (white == null) {
+                white = SET_TEXT_COLOR_WHITE + "JOIN" + SET_TEXT_COLOR_BLUE;
+            }
+            if (black == null) {
+                black = SET_TEXT_COLOR_BLACK + "JOIN" + SET_TEXT_COLOR_BLUE;
+            }
+            String[] add = {Integer.toString(number), game.gameName(), white, black};
             games.add(add);
             idMap.put(number, game.gameID());
             number += 1;
         }
         var list = new StringBuilder();
+        list.append("GameID, GameName, Player:White, Player:Black").append('\n');
         for (String[] game : games) {
             list.append(Arrays.toString(game)).append('\n');
         }
@@ -106,9 +115,9 @@ public class ChessClient {
 
     public String join(String... params) throws ResponseException {
         assertSignedIn();
-        if (params.length == 2) {
+        if (params.length == 2 && params[0].matches("[0-9]+")) {
             int number = Integer.parseInt(params[0]);
-            if (number > idMap.size()) {
+            if (number > idMap.size() || number < 1) {
                 throw new ResponseException(400, "Cannot find game. List games again.");
             }
             int id = idMap.get(number);
@@ -124,16 +133,16 @@ public class ChessClient {
 
     public String observe(String... params) throws ResponseException {
         assertSignedIn();
-        if (params.length == 1) {
+        if (params.length == 1 && params[0].matches("[0-9]+")) {
             int number = Integer.parseInt(params[0]);
-            if (number > idMap.size()) {
+            if (number > idMap.size() || number < 1) {
                 throw new ResponseException(400, "Cannot find game. List games again.");
             }
             int id = idMap.get(number);
             System.out.printf("observing game: %s%n", number);
             return createWhiteBoard();
         }
-        throw new ResponseException(400, "Expected: <ID");
+        throw new ResponseException(400, "Expected: <ID>");
     }
 
     public String logout() throws ResponseException {
