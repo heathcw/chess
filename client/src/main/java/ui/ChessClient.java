@@ -39,12 +39,7 @@ public class ChessClient {
                 default -> help();
             };
         } catch (ResponseException ex) {
-            if (ex.getStatusCode() != 400) {
-                return SET_TEXT_COLOR_RED + "There was an error\n" + help();
-            }
-            else {
-                return SET_TEXT_COLOR_RED + ex.getMessage();
-            }
+            return SET_TEXT_COLOR_RED + ex.getMessage();
         }
     }
 
