@@ -1,14 +1,19 @@
 package handler;
 
+import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.SQLAuthDAO;
+import dataaccess.SQLGameDAO;
 import model.AuthData;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
@@ -33,7 +38,7 @@ public class WebSocketHandler {
                 case LEAVE -> leave(session, user, command);
                 case RESIGN -> resign(session, user, command);
             }
-        } catch (DataAccessException | IOException e) {
+        } catch (DataAccessException | IOException | InvalidMoveException e) {
             sendMessage();
         }
     }
@@ -55,9 +60,24 @@ public class WebSocketHandler {
         connections.broadcast(user, notification);
     }
 
-    private void makeMove(Session session, String user, MakeMoveCommand command) {}
+    private void makeMove(Session session, String user, MakeMoveCommand command) throws DataAccessException, InvalidMoveException, IOException {
+        SQLGameDAO games = new SQLGameDAO();
+        games.updateGame(command.getMove(), command.getGameID());
+        ChessGame game = games.getGameByID(command.getGameID()).game();
+        String json = serializer.toJson(game);
+        var message = String.format("%s made a move", user);
+        NotificationMessage notification = new NotificationMessage(message);
+        connections.broadcast(user, notification);
+        LoadGameMessage load = new LoadGameMessage(json);
+        connections.load(load);
+    }
 
-    private void leave(Session session, String user, UserGameCommand command) {}
+    private void leave(Session session, String user, UserGameCommand command) throws IOException {
+        connections.remove(user);
+        var message = String.format("%s left the game", user);
+        var notification = new NotificationMessage(message);
+        connections.broadcast(user, notification);
+    }
 
     private void resign(Session session, String user, UserGameCommand command) {}
 }

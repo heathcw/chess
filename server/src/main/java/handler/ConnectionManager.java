@@ -1,6 +1,7 @@
 package handler;
 
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
@@ -34,6 +35,12 @@ public class ConnectionManager {
         // Clean up any connections that were left open.
         for (var c : removeList) {
             connections.remove(c.user);
+        }
+    }
+
+    public void load(LoadGameMessage message) throws IOException {
+        for (var c : connections.values()) {
+            c.send(message.toString());
         }
     }
 }

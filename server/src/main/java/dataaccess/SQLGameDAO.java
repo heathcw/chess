@@ -1,6 +1,8 @@
 package dataaccess;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import model.GameData;
 
@@ -158,6 +160,28 @@ public class SQLGameDAO implements GameDAO {
             conn = manager.getConnection();
             var preparedStatement = conn.prepareStatement(statement);
             preparedStatement.setString(1, username);
+            preparedStatement.setInt(2, id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateGame(ChessMove move, int id) throws DataAccessException, InvalidMoveException {
+        String statement = "UPDATE gameData SET game = ? WHERE id = ?";
+        GameData game = getGameByID(id);
+        if (game == null) {
+            throw new DataAccessException("Error: game not found");
+        }
+
+        try {
+            var serializer = new Gson();
+            game.game().makeMove(move);
+            String json = serializer.toJson(game.game());
+            conn = manager.getConnection();
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.setString(1, json);
             preparedStatement.setInt(2, id);
 
             preparedStatement.executeUpdate();
