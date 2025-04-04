@@ -2,6 +2,7 @@ package ui;
 
 import exception.ResponseException;
 import com.google.gson.Gson;
+import websocket.commands.UserGameCommand;
 import websocket.messages.NotificationMessage;
 
 import javax.websocket.*;
@@ -37,5 +38,9 @@ public class WebSocketFacade extends Endpoint {
 
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
+    }
+
+    public void connect(UserGameCommand request) {
+
     }
 }

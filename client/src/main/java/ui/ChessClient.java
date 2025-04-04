@@ -2,8 +2,13 @@ package ui;
 
 import java.util.*;
 
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessPiece;
+import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
+import websocket.commands.UserGameCommand;
 
 import static ui.EscapeSequences.*;
 
@@ -17,13 +22,18 @@ public class ChessClient {
     private final Map<Integer, Integer> idMap = new HashMap<>();
     private NotificationHandler notificationHandler;
     private WebSocketFacade ws;
+    private String url;
 
     public ChessClient(String url, NotificationHandler notificationHandler) {
         server = new ServerFacade(url);
         this.notificationHandler = notificationHandler;
+        this.url = url;
     }
 
     public String eval(String input) {
+        ChessGame game = new ChessGame();
+        var serializer = new Gson();
+        String json = serializer.toJson(game);
         try {
             var tokens = input.toLowerCase().split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -37,7 +47,7 @@ public class ChessClient {
                 case "join" -> join(params);
                 case "observe" -> observe(params);
                 case "logout" -> logout();
-                case "debug" -> createWhiteBoard();
+                case "debug" -> loadWhiteGame(json);
                 case "black" -> createBlackBoard();
                 default -> help();
             };
@@ -121,6 +131,8 @@ public class ChessClient {
             int id = idMap.get(number);
             JoinRequest request = new JoinRequest(params[1].toUpperCase(), id, authToken);
             server.joinGame(request);
+            UserGameCommand connect = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, id);
+            ws = new WebSocketFacade(url, notificationHandler);
             if (request.playerColor().equals("BLACK")) {
                 return createBlackBoard();
             }
@@ -202,8 +214,8 @@ public class ChessClient {
         board.append((SET_BG_COLOR_RED + BLACK_PAWN + SET_BG_COLOR_WHITE + BLACK_PAWN).repeat(4));
         board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("7").append(" ").append(RESET_BG_COLOR).append('\n');
 
-        board.append(boardRow(6));
-        board.append(boardRow(4));
+        board.append(boardRow(6, null, white));
+        board.append(boardRow(4, null, white));
 
         board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("2").append(" ");
         board.append((SET_BG_COLOR_WHITE + WHITE_PAWN + SET_BG_COLOR_RED + WHITE_PAWN).repeat(4));
@@ -223,6 +235,36 @@ public class ChessClient {
         }
         board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("1").append(" ").append(RESET_BG_COLOR).append('\n');
 
+        board.append(SET_BG_COLOR_LIGHT_GREY).append("   ");
+        for (String letter: letters) {
+            board.append(" ").append(letter).append('\u2003');
+        }
+        board.append("   ").append(RESET_BG_COLOR).append('\n');
+
+        return board.toString();
+    }
+
+    private String loadWhiteGame(String chessString) {
+        var serializer = new Gson();
+        ChessGame game = serializer.fromJson(chessString, ChessGame.class);
+        StringBuilder board = new StringBuilder();
+        String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
+        boolean white = true;
+
+        //top letters
+        board.append(SET_BG_COLOR_LIGHT_GREY).append("   ").append(SET_TEXT_BOLD).append(SET_TEXT_COLOR_BLACK);
+        for (String letter: letters) {
+            board.append(" ").append(letter).append('\u2003');
+        }
+        board.append("   ").append(RESET_BG_COLOR).append('\n');
+
+        //rows
+        for (int i = 8; i > 0; i--) {
+            white = i % 2 == 0;
+            board.append(boardRow(i, game.getBoard().getBoard(), white));
+        }
+
+        //bottom letters
         board.append(SET_BG_COLOR_LIGHT_GREY).append("   ");
         for (String letter: letters) {
             board.append(" ").append(letter).append('\u2003');
@@ -263,8 +305,8 @@ public class ChessClient {
         board.append((SET_BG_COLOR_RED + WHITE_PAWN + SET_BG_COLOR_WHITE + WHITE_PAWN).repeat(4));
         board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("2").append(" ").append(RESET_BG_COLOR).append('\n');
 
-        board.append(boardRow(3));
-        board.append(boardRow(5));
+        board.append(boardRow(3, null, white));
+        board.append(boardRow(5, null, white));
 
         board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("7").append(" ");
         board.append((SET_BG_COLOR_WHITE + BLACK_PAWN + SET_BG_COLOR_RED + BLACK_PAWN).repeat(4));
@@ -293,14 +335,65 @@ public class ChessClient {
         return board.toString();
     }
 
-    private String boardRow(int rowNumber) {
+    private String boardRow(int rowNumber, ChessPiece[][] board, boolean white) {
         String firstNumber = Integer.toString(rowNumber);
-        String secondNumber = Integer.toString(rowNumber - 1);
-        String emptyRow = (SET_BG_COLOR_WHITE + EMPTY + SET_BG_COLOR_RED + EMPTY).repeat(4);
-        String reverseRow = (SET_BG_COLOR_RED + EMPTY + SET_BG_COLOR_WHITE + EMPTY).repeat(4);
-        return SET_BG_COLOR_LIGHT_GREY + " " + firstNumber + " " + emptyRow + SET_BG_COLOR_LIGHT_GREY + " "
-                + firstNumber + " " + RESET_BG_COLOR + '\n' + SET_BG_COLOR_LIGHT_GREY + " " + secondNumber + " "
-                + reverseRow + SET_BG_COLOR_LIGHT_GREY + " " + secondNumber + " " + RESET_BG_COLOR + '\n';
+        rowNumber--;
+        StringBuilder row = new StringBuilder();
+        row.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append(firstNumber).append(" ");
+        for (int i = 0; i < 8; i++) {
+            if (white) {
+                row.append(SET_BG_COLOR_WHITE);
+                white = false;
+            } else {
+                row.append(SET_BG_COLOR_RED);
+                white = true;
+            }
+            if (board[rowNumber][i] == null) {
+                row.append(EMPTY);
+                continue;
+            }
+            switch (board[rowNumber][i].getPieceType()) {
+                case ChessPiece.PieceType.PAWN -> {
+                    switch (board[rowNumber][i].getTeamColor()) {
+                        case WHITE -> row.append(WHITE_PAWN);
+                        case BLACK -> row.append(BLACK_PAWN);
+                    }
+                }
+                case ChessPiece.PieceType.BISHOP -> {
+                    switch (board[rowNumber][i].getTeamColor()) {
+                        case WHITE -> row.append(WHITE_BISHOP);
+                        case BLACK -> row.append(BLACK_BISHOP);
+                    }
+                }
+                case ChessPiece.PieceType.ROOK -> {
+                    switch (board[rowNumber][i].getTeamColor()) {
+                        case WHITE -> row.append(WHITE_ROOK);
+                        case BLACK -> row.append(BLACK_ROOK);
+                    }
+                }
+                case ChessPiece.PieceType.KNIGHT -> {
+                    switch (board[rowNumber][i].getTeamColor()) {
+                        case WHITE -> row.append(WHITE_KNIGHT);
+                        case BLACK -> row.append(BLACK_KNIGHT);
+                    }
+                }
+                case ChessPiece.PieceType.KING -> {
+                    switch (board[rowNumber][i].getTeamColor()) {
+                        case WHITE -> row.append(WHITE_KING);
+                        case BLACK -> row.append(BLACK_KING);
+                    }
+                }
+                case ChessPiece.PieceType.QUEEN -> {
+                    switch (board[rowNumber][i].getTeamColor()) {
+                        case WHITE -> row.append(WHITE_QUEEN);
+                        case BLACK -> row.append(BLACK_QUEEN);
+                    }
+                }
+            }
+        }
+        row.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append(firstNumber).append(" ").append(RESET_BG_COLOR);
+        row.append('\n');
+        return row.toString();
     }
 
     private void assertSignedIn() throws ResponseException {
