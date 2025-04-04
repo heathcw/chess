@@ -1,15 +1,17 @@
 package ui;
 
+import websocket.messages.NotificationMessage;
+
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
-public class ChessRepl {
+public class ChessRepl implements NotificationHandler {
 
     private final ChessClient client;
 
     public ChessRepl(String serverUrl) {
-        client = new ChessClient(serverUrl);
+        client = new ChessClient(serverUrl, this);
     }
 
     public void run() {
@@ -35,5 +37,11 @@ public class ChessRepl {
 
     private void printPrompt() {
         System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
+    }
+
+    @Override
+    public void notify(NotificationMessage notification) {
+        System.out.println(SET_TEXT_COLOR_RED + notification.getMessage());
+        printPrompt();
     }
 }

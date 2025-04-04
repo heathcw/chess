@@ -15,9 +15,12 @@ public class ChessClient {
     private State state = State.SIGNEDOUT;
     private final Collection<String[]> games = new ArrayList<>();
     private final Map<Integer, Integer> idMap = new HashMap<>();
+    private NotificationHandler notificationHandler;
+    private WebSocketFacade ws;
 
-    public ChessClient(String url) {
+    public ChessClient(String url, NotificationHandler notificationHandler) {
         server = new ServerFacade(url);
+        this.notificationHandler = notificationHandler;
     }
 
     public String eval(String input) {
