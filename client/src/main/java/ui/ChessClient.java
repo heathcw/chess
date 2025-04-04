@@ -48,7 +48,7 @@ public class ChessClient {
                 case "observe" -> observe(params);
                 case "logout" -> logout();
                 case "debug" -> loadWhiteGame(json);
-                case "black" -> createBlackBoard();
+                case "black" -> loadBlackGame(json);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -249,7 +249,7 @@ public class ChessClient {
         ChessGame game = serializer.fromJson(chessString, ChessGame.class);
         StringBuilder board = new StringBuilder();
         String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
-        boolean white = true;
+        boolean white;
 
         //top letters
         board.append(SET_BG_COLOR_LIGHT_GREY).append("   ").append(SET_TEXT_BOLD).append(SET_TEXT_COLOR_BLACK);
@@ -260,6 +260,36 @@ public class ChessClient {
 
         //rows
         for (int i = 8; i > 0; i--) {
+            white = i % 2 == 0;
+            board.append(boardRow(i, game.getBoard().getBoard(), white));
+        }
+
+        //bottom letters
+        board.append(SET_BG_COLOR_LIGHT_GREY).append("   ");
+        for (String letter: letters) {
+            board.append(" ").append(letter).append('\u2003');
+        }
+        board.append("   ").append(RESET_BG_COLOR).append('\n');
+
+        return board.toString();
+    }
+
+    private String loadBlackGame(String chessString) {
+        var serializer = new Gson();
+        ChessGame game = serializer.fromJson(chessString, ChessGame.class);
+        StringBuilder board = new StringBuilder();
+        String[] letters = {"h", "g", "f", "e", "d", "c", "b", "a"};
+        boolean white;
+
+        //top letters
+        board.append(SET_BG_COLOR_LIGHT_GREY).append("   ").append(SET_TEXT_BOLD).append(SET_TEXT_COLOR_BLACK);
+        for (String letter: letters) {
+            board.append(" ").append(letter).append('\u2003');
+        }
+        board.append("   ").append(RESET_BG_COLOR).append('\n');
+
+        //rows
+        for (int i = 1; i <= 8; i++) {
             white = i % 2 == 0;
             board.append(boardRow(i, game.getBoard().getBoard(), white));
         }
