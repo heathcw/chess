@@ -4,16 +4,20 @@ import com.google.gson.Gson;
 import com.sun.security.jgss.AuthorizationDataEntry;
 import dataaccess.DataAccessException;
 import handler.HandlerClass;
+import handler.WebSocketHandler;
 import spark.*;
 
 public class Server {
 
     private final HandlerClass handler = new HandlerClass();
+    private final WebSocketHandler wsHandler = new WebSocketHandler();
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/ws", wsHandler);
 
         // Register your endpoints and handle exceptions here.
         createRoutes();

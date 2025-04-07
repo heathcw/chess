@@ -20,9 +20,9 @@ public class ChessClient {
     private State state = State.SIGNEDOUT;
     private final Collection<String[]> games = new ArrayList<>();
     private final Map<Integer, Integer> idMap = new HashMap<>();
-    private NotificationHandler notificationHandler;
+    private final NotificationHandler notificationHandler;
     private WebSocketFacade ws;
-    private String url;
+    private final String url;
 
     public ChessClient(String url, NotificationHandler notificationHandler) {
         server = new ServerFacade(url);
@@ -133,6 +133,7 @@ public class ChessClient {
             server.joinGame(request);
             UserGameCommand connect = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, id);
             ws = new WebSocketFacade(url, notificationHandler);
+            ws.connect(connect);
             if (request.playerColor().equals("BLACK")) {
                 return createBlackBoard();
             }

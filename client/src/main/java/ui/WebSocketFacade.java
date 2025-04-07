@@ -40,7 +40,11 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void connect(UserGameCommand request) {
-
+    public void connect(UserGameCommand request) throws ResponseException {
+        try {
+            this.session.getBasicRemote().sendText(new Gson().toJson(request));
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
     }
 }
