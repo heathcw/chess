@@ -12,21 +12,26 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
-    public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Integer, ArrayList<Connection>> connections = new ConcurrentHashMap<>();
     private final Gson serializer = new Gson();
 
-    public void add(String user, Session session) {
+    public void add(int id, String user, Session session) {
         var connection = new Connection(user, session);
-        connections.put(user, connection);
+        if (connections.containsKey(id)) {
+            connections.get(id).add(connection);
+        } else {
+            connections.put(id, new ArrayList<>());
+            connections.get(id).add(connection);
+        }
     }
 
-    public void remove(String user) {
-        connections.remove(user);
+    public void remove(Integer id, String user) {
+        connections.get(id).removeIf(c -> c.user.equals(user));
     }
 
-    public void broadcast(String excludeUser, ServerMessage message) throws IOException {
+    public void broadcast(Integer id, String excludeUser, ServerMessage message) throws IOException {
         var removeList = new ArrayList<Connection>();
-        for (var c : connections.values()) {
+        for (Connection c : connections.get(id)) {
             if (c.session.isOpen()) {
                 if (!c.user.equals(excludeUser)) {
                     String send = serializer.toJson(message);
@@ -39,12 +44,12 @@ public class ConnectionManager {
 
         // Clean up any connections that were left open.
         for (var c : removeList) {
-            connections.remove(c.user);
+            connections.get(id).remove(c);
         }
     }
 
-    public void load(LoadGameMessage message, String includeUser) throws IOException {
-        for (var c : connections.values()) {
+    public void load(Integer id, LoadGameMessage message, String includeUser) throws IOException {
+        for (Connection c : connections.get(id)) {
             if (c.session.isOpen()) {
                 if (c.user.equals(includeUser)) {
                     String send = serializer.toJson(message);
@@ -54,12 +59,14 @@ public class ConnectionManager {
         }
     }
 
-    public void error(Session session, ErrorMessage e, String user) throws IOException {
+    public void error(Session session, ErrorMessage e) throws IOException {
         String send = serializer.toJson(e);
-        if (user == null) {
-            session.getRemote().sendString(send);
-        }
-        for (var c : connections.values()) {
+        session.getRemote().sendString(send);
+    }
+
+    public void notification(Integer id, NotificationMessage message, String user) throws IOException {
+        String send = serializer.toJson(message);
+        for (Connection c : connections.get(id)) {
             if (c.session.isOpen()) {
                 if (c.user.equals(user)) {
                     c.send(send);

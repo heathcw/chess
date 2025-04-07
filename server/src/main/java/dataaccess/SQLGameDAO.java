@@ -190,6 +190,63 @@ public class SQLGameDAO implements GameDAO {
         }
     }
 
+    public void gameOver(int id) throws DataAccessException {
+        String statement = "UPDATE gameData SET game = ? WHERE id = ?";
+        GameData game = getGameByID(id);
+        if (game == null) {
+            throw new DataAccessException("Error: game not found");
+        }
+        if (game.game().isGameOver()) {
+            throw new DataAccessException("Error: the game is already over");
+        }
+
+        try {
+            var serializer = new Gson();
+            game.game().gameOver();
+            String json = serializer.toJson(game.game());
+            conn = manager.getConnection();
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.setString(1, json);
+            preparedStatement.setInt(2, id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void leaveGame(String playerColor, int id) throws DataAccessException {
+        String statement;
+        GameData check = getGameByID(id);
+        if (check == null) {
+            throw new DataAccessException("Error: game not found");
+        }
+        if (playerColor.equals("WHITE")) {
+            if (check.whiteUsername() == null) {
+                throw new DataAccessException("Error: already left");
+            }
+            statement = "UPDATE gameData SET whiteUsername = ? WHERE id = ?";
+        } else if (playerColor.equals("BLACK")) {
+            if (check.blackUsername() == null) {
+                throw new DataAccessException("Error: already left");
+            }
+            statement = "UPDATE gameData SET blackUsername = ? WHERE id = ?";
+        } else {
+            throw new DataAccessException("Error: bad request");
+        }
+
+        try {
+            conn = manager.getConnection();
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.setString(1, null);
+            preparedStatement.setInt(2, id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void clear() {
         try {

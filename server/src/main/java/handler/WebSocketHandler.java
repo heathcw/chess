@@ -71,23 +71,23 @@ public class WebSocketHandler {
     private void sendMessage(Session session, Exception e, String user) {
         ErrorMessage error = new ErrorMessage(e.getMessage());
         try {
-            connections.error(session, error, user);
+            connections.error(session, error);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
     private void connect(Session session, String user, UserGameCommand command) throws IOException, DataAccessException {
-        connections.add(user, session);
+        connections.add(command.getGameID(), user, session);
         var message = String.format("%s connected", user);
         NotificationMessage notification = new NotificationMessage(message);
         if (games.getGameByID(command.getGameID()) == null) {
             throw new DataAccessException("Error: game does not exist");
         }
-        connections.broadcast(user, notification);
+        connections.broadcast(command.getGameID(), user, notification);
         ChessGame game = games.getGameByID(command.getGameID()).game();
         String json = serializer.toJson(game);
-        connections.load(new LoadGameMessage(json), user);
+        connections.load(command.getGameID(), new LoadGameMessage(json), user);
     }
 
     private void makeMove(Session session, String user, MakeMoveCommand command) throws DataAccessException, InvalidMoveException, IOException {
@@ -107,18 +107,36 @@ public class WebSocketHandler {
         String json = serializer.toJson(game);
         var message = String.format("%s made a move", user);
         NotificationMessage notification = new NotificationMessage(message);
-        connections.broadcast(user, notification);
+        connections.broadcast(command.getGameID(), user, notification);
         LoadGameMessage load = new LoadGameMessage(json);
-        connections.load(load, user);
-        connections.broadcast(user, load);
+        connections.load(command.getGameID(), load, user);
+        connections.broadcast(command.getGameID(), user, load);
     }
 
-    private void leave(Session session, String user, UserGameCommand command) throws IOException {
-        connections.remove(user);
+    private void leave(Session session, String user, UserGameCommand command) throws IOException, DataAccessException {
+        GameData data = games.getGameByID(command.getGameID());
+        if (data.whiteUsername().equals(user)) {
+            games.leaveGame("WHITE", command.getGameID());
+        } else if (data.blackUsername().equals(user)) {
+            games.leaveGame("BLACK", command.getGameID());
+        }
+        connections.remove(command.getGameID(), user);
         var message = String.format("%s left the game", user);
         var notification = new NotificationMessage(message);
-        connections.broadcast(user, notification);
+        connections.broadcast(command.getGameID(), user, notification);
     }
 
-    private void resign(Session session, String user, UserGameCommand command) {}
+    private void resign(Session session, String user, UserGameCommand command) throws DataAccessException, IOException, InvalidMoveException {
+        GameData data = games.getGameByID(command.getGameID());
+        if (!data.blackUsername().equals(user) && !data.whiteUsername().equals(user)) {
+            throw new InvalidMoveException("Error: you are an observer");
+        }
+        games.gameOver(command.getGameID());
+        var message = String.format("%s resigned", user);
+        var notification = new NotificationMessage(message);
+        connections.broadcast(command.getGameID(), user, notification);
+        message = "you resigned";
+        notification = new NotificationMessage(message);
+        connections.notification(command.getGameID(), notification, user);
+    }
 }

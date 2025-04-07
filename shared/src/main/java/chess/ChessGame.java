@@ -13,9 +13,18 @@ public class ChessGame {
 
     private TeamColor teamTurn = TeamColor.WHITE;
     private ChessBoard board = new ChessBoard();
+    private boolean gameOver = false;
 
     public ChessGame() {
         this.board.resetBoard();
+    }
+
+    public boolean isGameOver() {
+        return this.gameOver;
+    }
+
+    public void gameOver() {
+        this.gameOver = true;
     }
 
     /**
@@ -86,6 +95,9 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece pieceToMove = this.board.getPiece(move.getStartPosition());
+        if (isGameOver()) {
+            throw new InvalidMoveException("Error: the game is over");
+        }
         if (pieceToMove == null || pieceToMove.getTeamColor() != this.teamTurn) {
             throw new InvalidMoveException("Error: invalid move");
         }
@@ -172,6 +184,7 @@ public class ChessGame {
                 }
             }
         }
+        gameOver = true;
         return true;
     }
 
@@ -198,6 +211,7 @@ public class ChessGame {
                 }
             }
         }
+        gameOver = true;
         return true;
     }
 
