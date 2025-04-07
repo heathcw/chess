@@ -45,7 +45,10 @@ public class WebSocketHandler {
 
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, user, command);
-                case MAKE_MOVE -> makeMove(session, user, (MakeMoveCommand) command);
+                case MAKE_MOVE -> {
+                        MakeMoveCommand move = serializer.fromJson(msg, MakeMoveCommand.class);
+                        makeMove(session, user, move);
+                }
                 case LEAVE -> leave(session, user, command);
                 case RESIGN -> resign(session, user, command);
             }
@@ -88,6 +91,17 @@ public class WebSocketHandler {
     }
 
     private void makeMove(Session session, String user, MakeMoveCommand command) throws DataAccessException, InvalidMoveException, IOException {
+        GameData data = games.getGameByID(command.getGameID());
+        if (data.game().getTeamTurn() == ChessGame.TeamColor.WHITE) {
+            if (data.blackUsername().equals(user)) {
+                throw new InvalidMoveException("Error: not your turn");
+            }
+        } else if (data.whiteUsername().equals(user)) {
+            throw new InvalidMoveException("Error: not your turn");
+        }
+        if (!data.blackUsername().equals(user) && !data.whiteUsername().equals(user)) {
+            throw new InvalidMoveException("Error: you are an observer");
+        }
         games.updateGame(command.getMove(), command.getGameID());
         ChessGame game = games.getGameByID(command.getGameID()).game();
         String json = serializer.toJson(game);
@@ -96,6 +110,7 @@ public class WebSocketHandler {
         connections.broadcast(user, notification);
         LoadGameMessage load = new LoadGameMessage(json);
         connections.load(load, user);
+        connections.broadcast(user, load);
     }
 
     private void leave(Session session, String user, UserGameCommand command) throws IOException {

@@ -63,7 +63,6 @@ public class ConnectionManager {
             if (c.session.isOpen()) {
                 if (c.user.equals(user)) {
                     c.send(send);
-                    connections.remove(c.user);
                 }
             }
         }
