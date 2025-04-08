@@ -37,9 +37,6 @@ public class ChessClient {
     }
 
     public String eval(String input) {
-        ChessGame game = new ChessGame();
-        var serializer = new Gson();
-        String json = serializer.toJson(game);
         try {
             var tokens = input.toLowerCase().split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -53,12 +50,11 @@ public class ChessClient {
                 case "join" -> join(params);
                 case "observe" -> observe(params);
                 case "logout" -> logout();
-                case "debug" -> loadWhiteGame(json);
-                case "black" -> loadBlackGame(json);
                 case "move" -> makeMove(params);
                 case "redraw" -> redraw(chessString);
                 case "resign" -> resign();
                 case "leave" -> leave();
+                case "highlight" -> highlight(params);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -190,9 +186,9 @@ public class ChessClient {
         }
         chessString = game;
         if (team.equals("White")) {
-            return loadWhiteGame(game);
+            return loadWhiteGame(game, null);
         } else {
-            return loadBlackGame(game);
+            return loadBlackGame(game, null);
         }
     }
 
@@ -212,6 +208,22 @@ public class ChessClient {
         UserGameCommand request = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameId);
         ws.connect(request);
         return "";
+    }
+
+    public String highlight(String... params) throws ResponseException {
+        assertInGame();
+        Map<String, Integer> columns = getStringIntegerMap();
+        if (params.length == 1) {
+            int row = params[0].charAt(1) - '0';
+            int col = columns.get(Character.toString(params[0].charAt(0)));
+            ChessPosition toHighlight = new ChessPosition(row, col);
+            if (team.equals("White")) {
+                return loadWhiteGame(chessString, toHighlight);
+            } else {
+                return loadBlackGame(chessString, toHighlight);
+            }
+        }
+        throw new ResponseException(400, "Expected: <POSITION>");
     }
 
     public String makeMove(String... params) throws ResponseException {
@@ -266,6 +278,7 @@ public class ChessClient {
             return """
                     - redraw
                     - move <STARTPOSITION> <ENDPOSITION>
+                    - highlight <POSITION>
                     - resign
                     - leave
                     - help
@@ -282,9 +295,13 @@ public class ChessClient {
                 """;
     }
 
-    private String loadWhiteGame(String chessString) {
+    private String loadWhiteGame(String chessString, ChessPosition toHighlight) {
         var serializer = new Gson();
         ChessGame game = serializer.fromJson(chessString, ChessGame.class);
+        Collection<ChessMove> highlighted = new ArrayList<>();
+        if (toHighlight != null) {
+            highlighted = game.validMoves(toHighlight);
+        }
         StringBuilder board = new StringBuilder();
         String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
         boolean white;
@@ -299,7 +316,7 @@ public class ChessClient {
         //rows
         for (int i = 8; i > 0; i--) {
             white = i % 2 == 0;
-            board.append(boardRow(i, game.getBoard().getBoard(), white));
+            board.append(boardRow(i, game.getBoard().getBoard(), white, highlighted, toHighlight));
         }
 
         //bottom letters
@@ -312,9 +329,13 @@ public class ChessClient {
         return board.toString();
     }
 
-    private String loadBlackGame(String chessString) {
+    private String loadBlackGame(String chessString, ChessPosition toHighlight) {
         var serializer = new Gson();
         ChessGame game = serializer.fromJson(chessString, ChessGame.class);
+        Collection<ChessMove> highlighted = new ArrayList<>();
+        if (toHighlight != null) {
+            highlighted = game.validMoves(toHighlight);
+        }
         StringBuilder board = new StringBuilder();
         String[] letters = {"h", "g", "f", "e", "d", "c", "b", "a"};
         boolean white;
@@ -329,7 +350,7 @@ public class ChessClient {
         //rows
         for (int i = 1; i <= 8; i++) {
             white = i % 2 == 0;
-            board.append(boardRow(i, game.getBoard().getBoard(), white));
+            board.append(boardRow(i, game.getBoard().getBoard(), white, highlighted, toHighlight));
         }
 
         //bottom letters
@@ -343,17 +364,29 @@ public class ChessClient {
     }
 
 
-    private String boardRow(int rowNumber, ChessPiece[][] board, boolean white) {
+    private String boardRow(int rowNumber, ChessPiece[][] board, boolean white, Collection<ChessMove> highlight, ChessPosition start) {
         String firstNumber = Integer.toString(rowNumber);
         rowNumber--;
         StringBuilder row = new StringBuilder();
         row.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append(firstNumber).append(" ");
         for (int i = 0; i < 8; i++) {
+            ChessPosition move = new ChessPosition(rowNumber + 1, i + 1);
+            ChessMove check = new ChessMove(start, move, null);
             if (white) {
-                row.append(SET_BG_COLOR_WHITE);
+                if ((highlight != null && highlight.contains(check))
+                        || (start != null && rowNumber == start.getRow() && i == start.getColumn())) {
+                    row.append(SET_BG_COLOR_GREEN);
+                } else {
+                    row.append(SET_BG_COLOR_WHITE);
+                }
                 white = false;
             } else {
-                row.append(SET_BG_COLOR_RED);
+                if ((highlight != null && highlight.contains(check)) || (start != null && rowNumber == start.getRow()
+                        && i == start.getColumn() && highlight != null)) {
+                    row.append(SET_BG_COLOR_DARK_GREEN);
+                } else {
+                    row.append(SET_BG_COLOR_RED);
+                }
                 white = true;
             }
             if (board[rowNumber][i] == null) {
