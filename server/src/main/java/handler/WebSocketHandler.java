@@ -93,14 +93,11 @@ public class WebSocketHandler {
     private void makeMove(Session session, String user, MakeMoveCommand command) throws DataAccessException, InvalidMoveException, IOException {
         GameData data = games.getGameByID(command.getGameID());
         if (data.game().getTeamTurn() == ChessGame.TeamColor.WHITE) {
-            if (data.blackUsername().equals(user)) {
+            if (data.whiteUsername() == null || !data.whiteUsername().equals(user)) {
                 throw new InvalidMoveException("Error: not your turn");
             }
-        } else if (data.whiteUsername().equals(user)) {
+        } else if (data.blackUsername() == null || !data.blackUsername().equals(user)) {
             throw new InvalidMoveException("Error: not your turn");
-        }
-        if (!data.blackUsername().equals(user) && !data.whiteUsername().equals(user)) {
-            throw new InvalidMoveException("Error: you are an observer");
         }
         games.updateGame(command.getMove(), command.getGameID());
         ChessGame game = games.getGameByID(command.getGameID()).game();

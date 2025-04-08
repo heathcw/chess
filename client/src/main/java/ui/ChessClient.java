@@ -2,12 +2,11 @@ package ui;
 
 import java.util.*;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
+import chess.*;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -21,6 +20,8 @@ public class ChessClient {
     private String user = null;
     private String authToken = null;
     private String team = null;
+    private int gameId;
+    private String chessString = null;
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
     private final Collection<String[]> games = new ArrayList<>();
@@ -54,6 +55,8 @@ public class ChessClient {
                 case "logout" -> logout();
                 case "debug" -> loadWhiteGame(json);
                 case "black" -> loadBlackGame(json);
+                case "move" -> makeMove(params);
+                case "redraw" -> redraw(chessString);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -140,6 +143,7 @@ public class ChessClient {
             ws = new WebSocketFacade(url, notificationHandler);
             ws.connect(connect);
             state = State.INGAME;
+            gameId = id;
             if (request.playerColor().equals("BLACK")) {
                 team = "Black";
                 return "Joined game as black";
@@ -161,10 +165,11 @@ public class ChessClient {
             System.out.printf("observing game: %s%n", number);
             state = State.INGAME;
             team = "White";
+            gameId = id;
             UserGameCommand connect = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, id);
             ws = new WebSocketFacade(url, notificationHandler);
             ws.connect(connect);
-            return createWhiteBoard();
+            return "Joined game as an observer";
         }
         throw new ResponseException(400, "Expected: <ID>");
     }
@@ -178,6 +183,10 @@ public class ChessClient {
     }
 
     public String redraw(String game) {
+        if (state != State.INGAME || game == null) {
+            return "";
+        }
+        chessString = game;
         if (team.equals("White")) {
             return loadWhiteGame(game);
         } else {
@@ -185,13 +194,28 @@ public class ChessClient {
         }
     }
 
-    public String makeMove(String... params) {
-        if (params.length == 2) {
-            switch (params[0]) {
-
-            }
+    public String makeMove(String... params) throws ResponseException {
+        assertInGame();
+        Map<String, Integer> columns = new HashMap<>();
+        String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
+        int i = 1;
+        for (String letter : letters) {
+            columns.put(letter, i);
+            i++;
         }
-        return "";
+        if (params.length == 2) {
+            int row = params[0].charAt(0) - '0';
+            int col = columns.get(Character.toString(params[0].charAt(1)));
+            ChessPosition start = new ChessPosition(row, col);
+            row = params[1].charAt(0) - '0';
+            col = columns.get(Character.toString(params[1].charAt(1)));
+            ChessPosition end = new ChessPosition(row, col);
+            ChessMove move = new ChessMove(start, end, null);
+            MakeMoveCommand command = new MakeMoveCommand(authToken, gameId, move);
+            ws.makeMove(command);
+            return "";
+        }
+        throw new ResponseException(400, "Expected: <STARTPOSITION> <ENDPOSITION>");
     }
 
     public String help() {
@@ -205,7 +229,7 @@ public class ChessClient {
         } else if (state == State.INGAME) {
             return """
                     - redraw
-                    - move <STARTPOSITION> <POSITION>
+                    - move <STARTPOSITION> <ENDPOSITION>
                     - resign
                     - leave
                     - help
@@ -220,68 +244,6 @@ public class ChessClient {
                 - quit
                 - help
                 """;
-    }
-
-    //to be deleted
-    private String createWhiteBoard() {
-        boolean white = true;
-        String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
-        String[] blackPieces = {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP,
-                BLACK_KNIGHT, BLACK_ROOK};
-        String[] whitePieces = {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING, WHITE_BISHOP,
-                WHITE_KNIGHT, WHITE_ROOK};
-        StringBuilder board = new StringBuilder();
-        board.append(SET_BG_COLOR_LIGHT_GREY).append("   ").append(SET_TEXT_BOLD).append(SET_TEXT_COLOR_BLACK);
-        for (String letter: letters) {
-            board.append(" ").append(letter).append('\u2003');
-        }
-        board.append("   ").append(RESET_BG_COLOR).append('\n');
-
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("8").append(" ");
-        for (String piece: blackPieces) {
-            if (white) {
-                board.append(SET_BG_COLOR_WHITE);
-                white = false;
-            } else {
-                board.append(SET_BG_COLOR_RED);
-                white = true;
-            }
-            board.append(piece);
-        }
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("8").append(" ").append(RESET_BG_COLOR).append('\n');
-
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("7").append(" ");
-        board.append((SET_BG_COLOR_RED + BLACK_PAWN + SET_BG_COLOR_WHITE + BLACK_PAWN).repeat(4));
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("7").append(" ").append(RESET_BG_COLOR).append('\n');
-
-        board.append(boardRow(6, null, white));
-        board.append(boardRow(4, null, white));
-
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("2").append(" ");
-        board.append((SET_BG_COLOR_WHITE + WHITE_PAWN + SET_BG_COLOR_RED + WHITE_PAWN).repeat(4));
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("2").append(" ").append(RESET_BG_COLOR).append('\n');
-
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("1").append(" ");
-        white = false;
-        for (String piece: whitePieces) {
-            if (white) {
-                board.append(SET_BG_COLOR_WHITE);
-                white = false;
-            } else {
-                board.append(SET_BG_COLOR_RED);
-                white = true;
-            }
-            board.append(piece);
-        }
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("1").append(" ").append(RESET_BG_COLOR).append('\n');
-
-        board.append(SET_BG_COLOR_LIGHT_GREY).append("   ");
-        for (String letter: letters) {
-            board.append(" ").append(letter).append('\u2003');
-        }
-        board.append("   ").append(RESET_BG_COLOR).append('\n');
-
-        return board.toString();
     }
 
     private String loadWhiteGame(String chessString) {
@@ -344,67 +306,6 @@ public class ChessClient {
         return board.toString();
     }
 
-    //to be deleted
-    private String createBlackBoard() {
-        boolean white = true;
-        String[] letters = {"h", "g", "f", "e", "d", "c", "b", "a"};
-        String[] blackPieces = {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_KING, BLACK_QUEEN, BLACK_BISHOP,
-                BLACK_KNIGHT, BLACK_ROOK};
-        String[] whitePieces = {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_KING, WHITE_QUEEN, WHITE_BISHOP,
-                WHITE_KNIGHT, WHITE_ROOK};
-        StringBuilder board = new StringBuilder();
-        board.append(SET_BG_COLOR_LIGHT_GREY).append("   ").append(SET_TEXT_BOLD).append(SET_TEXT_COLOR_BLACK);
-        for (String letter: letters) {
-            board.append(" ").append(letter).append('\u2003');
-        }
-        board.append("   ").append(RESET_BG_COLOR).append('\n');
-
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("1").append(" ");
-        for (String piece: whitePieces) {
-            if (white) {
-                board.append(SET_BG_COLOR_WHITE);
-                white = false;
-            } else {
-                board.append(SET_BG_COLOR_RED);
-                white = true;
-            }
-            board.append(piece);
-        }
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("1").append(" ").append(RESET_BG_COLOR).append('\n');
-
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("2").append(" ");
-        board.append((SET_BG_COLOR_RED + WHITE_PAWN + SET_BG_COLOR_WHITE + WHITE_PAWN).repeat(4));
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("2").append(" ").append(RESET_BG_COLOR).append('\n');
-
-        board.append(boardRow(3, null, white));
-        board.append(boardRow(5, null, white));
-
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("7").append(" ");
-        board.append((SET_BG_COLOR_WHITE + BLACK_PAWN + SET_BG_COLOR_RED + BLACK_PAWN).repeat(4));
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("7").append(" ").append(RESET_BG_COLOR).append('\n');
-
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("8").append(" ");
-        white = false;
-        for (String piece: blackPieces) {
-            if (white) {
-                board.append(SET_BG_COLOR_WHITE);
-                white = false;
-            } else {
-                board.append(SET_BG_COLOR_RED);
-                white = true;
-            }
-            board.append(piece);
-        }
-        board.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append("8").append(" ").append(RESET_BG_COLOR).append('\n');
-
-        board.append(SET_BG_COLOR_LIGHT_GREY).append("   ");
-        for (String letter: letters) {
-            board.append(" ").append(letter).append('\u2003');
-        }
-        board.append("   ").append(RESET_BG_COLOR).append('\n');
-
-        return board.toString();
-    }
 
     private String boardRow(int rowNumber, ChessPiece[][] board, boolean white) {
         String firstNumber = Integer.toString(rowNumber);
@@ -468,14 +369,20 @@ public class ChessClient {
     }
 
     private void assertSignedIn() throws ResponseException {
-        if (state == State.SIGNEDOUT) {
+        if (state != State.SIGNEDIN) {
             throw new ResponseException(400, "You must log in");
         }
     }
 
     private void assertSignedOut() throws ResponseException {
-        if (state == State.SIGNEDIN) {
+        if (state != State.SIGNEDOUT) {
             throw new ResponseException(400, "You are already logged in");
+        }
+    }
+
+    private void assertInGame() throws ResponseException {
+        if (state != State.INGAME) {
+            throw new ResponseException(400, "You must join a game");
         }
     }
 }
