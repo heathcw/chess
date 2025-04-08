@@ -115,9 +115,9 @@ public class WebSocketHandler {
 
     private void leave(Session session, String user, UserGameCommand command) throws IOException, DataAccessException {
         GameData data = games.getGameByID(command.getGameID());
-        if (data.whiteUsername().equals(user)) {
+        if (data.whiteUsername() != null && data.whiteUsername().equals(user)) {
             games.leaveGame("WHITE", command.getGameID());
-        } else if (data.blackUsername().equals(user)) {
+        } else if (data.blackUsername() != null && data.blackUsername().equals(user)) {
             games.leaveGame("BLACK", command.getGameID());
         }
         connections.remove(command.getGameID(), user);
