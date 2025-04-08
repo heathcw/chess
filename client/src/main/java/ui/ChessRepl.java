@@ -1,6 +1,9 @@
 package ui;
 
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.util.Scanner;
 
@@ -40,8 +43,20 @@ public class ChessRepl implements NotificationHandler {
     }
 
     @Override
-    public void notify(NotificationMessage notification) {
-        System.out.println(SET_TEXT_COLOR_RED + notification.getMessage());
-        printPrompt();
+    public void notify(ServerMessage message) {
+        switch (message.getServerMessageType()) {
+            case NOTIFICATION -> {
+                System.out.println(((NotificationMessage) message).getMessage());
+                printPrompt();
+            }
+            case LOAD_GAME -> {
+                System.out.println(client.redraw(((LoadGameMessage) message).getGame()));
+                printPrompt();
+            }
+            case ERROR -> {
+                System.out.println(((ErrorMessage) message).getErrorMessage());
+                printPrompt();
+            }
+        }
     }
 }

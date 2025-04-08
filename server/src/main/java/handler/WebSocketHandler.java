@@ -36,7 +36,7 @@ public class WebSocketHandler {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String msg) {
-        String user = null;
+        String user;
         try {
             UserGameCommand command = serializer.fromJson(msg, UserGameCommand.class);
 
@@ -53,7 +53,7 @@ public class WebSocketHandler {
                 case RESIGN -> resign(session, user, command);
             }
         } catch (DataAccessException | IOException | InvalidMoveException e) {
-            sendMessage(session, e, user);
+            sendMessage(session, e);
         }
     }
 
@@ -68,7 +68,7 @@ public class WebSocketHandler {
 
     private void saveSession(int gameID, Session session) {}
 
-    private void sendMessage(Session session, Exception e, String user) {
+    private void sendMessage(Session session, Exception e) {
         ErrorMessage error = new ErrorMessage(e.getMessage());
         try {
             connections.error(session, error);

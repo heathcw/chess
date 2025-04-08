@@ -9,6 +9,10 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import static ui.EscapeSequences.*;
 
@@ -16,6 +20,7 @@ public class ChessClient {
 
     private String user = null;
     private String authToken = null;
+    private String team = null;
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
     private final Collection<String[]> games = new ArrayList<>();
@@ -134,9 +139,12 @@ public class ChessClient {
             UserGameCommand connect = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, id);
             ws = new WebSocketFacade(url, notificationHandler);
             ws.connect(connect);
+            state = State.INGAME;
             if (request.playerColor().equals("BLACK")) {
+                team = "Black";
                 return createBlackBoard();
             }
+            team = "White";
             return createWhiteBoard();
         }
         throw new ResponseException(400, "Expected: <ID> <WHITE|BLACK>");
@@ -151,6 +159,11 @@ public class ChessClient {
             }
             int id = idMap.get(number);
             System.out.printf("observing game: %s%n", number);
+            state = State.INGAME;
+            team = "White";
+            UserGameCommand connect = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, id);
+            ws = new WebSocketFacade(url, notificationHandler);
+            ws.connect(connect);
             return createWhiteBoard();
         }
         throw new ResponseException(400, "Expected: <ID>");
@@ -164,12 +177,28 @@ public class ChessClient {
         return "You logged out";
     }
 
+    public String redraw(String game) {
+        if (team.equals("White")) {
+            return loadWhiteGame(game);
+        } else {
+            return loadBlackGame(game);
+        }
+    }
+
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
                     - register <USERNAME> <PASSWORD> <EMAIL>
                     - login <USERNAME> <PASSWORD>
                     - quit
+                    - help
+                    """;
+        } else if (state == State.INGAME) {
+            return """
+                    - redraw
+                    - move <PIECE> <POSITION>
+                    - resign
+                    - leave
                     - help
                     """;
         }
