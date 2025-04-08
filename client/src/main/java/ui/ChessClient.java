@@ -57,6 +57,8 @@ public class ChessClient {
                 case "black" -> loadBlackGame(json);
                 case "move" -> makeMove(params);
                 case "redraw" -> redraw(chessString);
+                case "resign" -> resign();
+                case "leave" -> leave();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -194,21 +196,33 @@ public class ChessClient {
         }
     }
 
+    public String resign() throws ResponseException {
+        assertInGame();
+        UserGameCommand request = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameId);
+        ws.connect(request);
+        return "";
+    }
+
+    public String leave() throws ResponseException {
+        assertInGame();
+        state = State.SIGNEDIN;
+        gameId = 0;
+        chessString = null;
+        team = null;
+        UserGameCommand request = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameId);
+        ws.connect(request);
+        return "";
+    }
+
     public String makeMove(String... params) throws ResponseException {
         assertInGame();
-        Map<String, Integer> columns = new HashMap<>();
-        String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
-        int i = 1;
-        for (String letter : letters) {
-            columns.put(letter, i);
-            i++;
-        }
+        Map<String, Integer> columns = getStringIntegerMap();
         if (params.length == 2) {
-            int row = params[0].charAt(0) - '0';
-            int col = columns.get(Character.toString(params[0].charAt(1)));
+            int row = params[0].charAt(1) - '0';
+            int col = columns.get(Character.toString(params[0].charAt(0)));
             ChessPosition start = new ChessPosition(row, col);
-            row = params[1].charAt(0) - '0';
-            col = columns.get(Character.toString(params[1].charAt(1)));
+            row = params[1].charAt(1) - '0';
+            col = columns.get(Character.toString(params[1].charAt(0)));
             ChessPosition end = new ChessPosition(row, col);
             ChessMove move = new ChessMove(start, end, null);
             MakeMoveCommand command = new MakeMoveCommand(authToken, gameId, move);
@@ -216,6 +230,28 @@ public class ChessClient {
             return "";
         }
         throw new ResponseException(400, "Expected: <STARTPOSITION> <ENDPOSITION>");
+    }
+
+    private Map<String, Integer> getStringIntegerMap() {
+        Map<String, Integer> columns = new HashMap<>();
+        String[] whiteLetters = {"a", "b", "c", "d", "e", "f", "g", "h"};
+        String[] blackLetters = {"h", "g", "f", "e", "d", "c", "b", "a"};
+        int i = 1;
+        switch (team) {
+            case "White" -> {
+                for (String letter : whiteLetters) {
+                    columns.put(letter, i);
+                    i++;
+                }
+            }
+            case "Black" -> {
+                for (String letter : blackLetters) {
+                    columns.put(letter, i);
+                    i++;
+                }
+            }
+        }
+        return columns;
     }
 
     public String help() {
