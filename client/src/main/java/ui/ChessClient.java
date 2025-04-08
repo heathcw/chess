@@ -142,10 +142,10 @@ public class ChessClient {
             state = State.INGAME;
             if (request.playerColor().equals("BLACK")) {
                 team = "Black";
-                return createBlackBoard();
+                return "Joined game as black";
             }
             team = "White";
-            return createWhiteBoard();
+            return "Joined game as white";
         }
         throw new ResponseException(400, "Expected: <ID> <WHITE|BLACK>");
     }
@@ -185,6 +185,15 @@ public class ChessClient {
         }
     }
 
+    public String makeMove(String... params) {
+        if (params.length == 2) {
+            switch (params[0]) {
+
+            }
+        }
+        return "";
+    }
+
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
@@ -196,7 +205,7 @@ public class ChessClient {
         } else if (state == State.INGAME) {
             return """
                     - redraw
-                    - move <PIECE> <POSITION>
+                    - move <STARTPOSITION> <POSITION>
                     - resign
                     - leave
                     - help
@@ -213,6 +222,7 @@ public class ChessClient {
                 """;
     }
 
+    //to be deleted
     private String createWhiteBoard() {
         boolean white = true;
         String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
@@ -334,6 +344,7 @@ public class ChessClient {
         return board.toString();
     }
 
+    //to be deleted
     private String createBlackBoard() {
         boolean white = true;
         String[] letters = {"h", "g", "f", "e", "d", "c", "b", "a"};

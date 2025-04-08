@@ -2,7 +2,9 @@ package ui;
 
 import exception.ResponseException;
 import com.google.gson.Gson;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
@@ -28,8 +30,7 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
-                    notificationHandler.notify(notification);
+                    notificationHandler.notify(message);
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -46,6 +47,14 @@ public class WebSocketFacade extends Endpoint {
             this.session.getBasicRemote().sendText(new Gson().toJson(request));
         } catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
+    public void makeMove(MakeMoveCommand request) throws ResponseException {
+        try {
+            this.session.getBasicRemote().sendText(new Gson().toJson(request));
+        } catch (IOException e) {
+            throw new ResponseException(500, e.getMessage());
         }
     }
 }

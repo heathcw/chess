@@ -1,5 +1,6 @@
 package ui;
 
+import com.google.gson.Gson;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -43,18 +44,23 @@ public class ChessRepl implements NotificationHandler {
     }
 
     @Override
-    public void notify(ServerMessage message) {
-        switch (message.getServerMessageType()) {
+    public void notify(String message) {
+        ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
+        switch (notification.getServerMessageType()) {
             case NOTIFICATION -> {
-                System.out.println(((NotificationMessage) message).getMessage());
+                NotificationMessage notify = new Gson().fromJson(message, NotificationMessage.class);
+                System.out.println(notify.getMessage());
                 printPrompt();
             }
             case LOAD_GAME -> {
-                System.out.println(client.redraw(((LoadGameMessage) message).getGame()));
+                System.out.println('\n');
+                LoadGameMessage load = new Gson().fromJson(message, LoadGameMessage.class);
+                System.out.println(client.redraw(load.getGame()));
                 printPrompt();
             }
             case ERROR -> {
-                System.out.println(((ErrorMessage) message).getErrorMessage());
+                ErrorMessage error = new Gson().fromJson(message, ErrorMessage.class);
+                System.out.println(error.getErrorMessage());
                 printPrompt();
             }
         }
