@@ -137,14 +137,8 @@ public class WebSocketHandler {
         LoadGameMessage load = new LoadGameMessage(json);
         connections.load(command.getGameID(), load, user);
         connections.broadcast(command.getGameID(), user, load);
-        if (game.isInCheck(ChessGame.TeamColor.WHITE)) {
-            message = "White is in check";
-            notification = new NotificationMessage(message);
-            connections.broadcast(command.getGameID(), user, notification);
-            connections.notification(command.getGameID(), notification, user);
-        }
-         else if (game.isInCheck(ChessGame.TeamColor.BLACK)) {
-            message = "Black is in check";
+        if (game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+            message = "Stalemate!";
             notification = new NotificationMessage(message);
             connections.broadcast(command.getGameID(), user, notification);
             connections.notification(command.getGameID(), notification, user);
@@ -152,36 +146,42 @@ public class WebSocketHandler {
         else if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
             game.gameOver();
             if (data.whiteUsername().equals(user)) {
-                message = "You lose!";
+                message = "Checkmate, You lose!";
                 notification = new NotificationMessage(message);
                 connections.notification(command.getGameID(), notification, user);
-                message = "White lost!";
+                message = "Checkmate, White lost!";
             } else {
-                message = "You win!";
+                message = "Checkmate, You win!";
                 notification = new NotificationMessage(message);
                 connections.notification(command.getGameID(), notification, user);
-                message = "black lost!";
+                message = "Checkmate, White lost!";
             }
             notification = new NotificationMessage(message);
             connections.broadcast(command.getGameID(), user, notification);
         } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
             game.gameOver();
             if (data.blackUsername().equals(user)) {
-                message = "You lose!";
+                message = "Checkmate, You lose!";
                 notification = new NotificationMessage(message);
                 connections.notification(command.getGameID(), notification, user);
-                message = "White lost!";
+                message = "Checkmate, Black lost!";
             } else {
-                message = "You win!";
+                message = "Checkmate, You win!";
                 notification = new NotificationMessage(message);
                 connections.notification(command.getGameID(), notification, user);
-                message = "black lost!";
+                message = "Checkmate, Black lost!";
             }
             notification = new NotificationMessage(message);
             connections.broadcast(command.getGameID(), user, notification);
         }
-        else if (game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK)) {
-            message = "Stalemate!";
+         else if (game.isInCheck(ChessGame.TeamColor.WHITE)) {
+            message = "White is in check";
+            notification = new NotificationMessage(message);
+            connections.broadcast(command.getGameID(), user, notification);
+            connections.notification(command.getGameID(), notification, user);
+        }
+         else if (game.isInCheck(ChessGame.TeamColor.BLACK)) {
+            message = "Black is in check";
             notification = new NotificationMessage(message);
             connections.broadcast(command.getGameID(), user, notification);
             connections.notification(command.getGameID(), notification, user);
