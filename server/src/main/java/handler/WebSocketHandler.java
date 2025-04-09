@@ -18,6 +18,8 @@ import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @WebSocket
 public class WebSocketHandler {
@@ -66,6 +68,32 @@ public class WebSocketHandler {
         return user.username();
     }
 
+    private String getTeam(String user, UserGameCommand command) {
+        GameData data = games.getGameByID(command.getGameID());
+        if (data.whiteUsername()!= null && data.whiteUsername().equals(user)) {
+            return "White";
+        } else if (data.blackUsername() != null && data.blackUsername().equals(user)) {
+            return "Black";
+        } else {
+            return "Observer";
+        }
+    }
+
+    private String convertMoveToString(MakeMoveCommand command) {
+        Map<Integer, String> columns = new HashMap<>();
+        String[] whiteLetters = {"a", "b", "c", "d", "e", "f", "g", "h"};
+        int i = 1;
+        for (String letter : whiteLetters) {
+            columns.put(i, letter);
+            i++;
+        }
+        String start = String.format("%s%s", columns.get(command.getMove().getStartPosition().getColumn() + 1),
+                command.getMove().getStartPosition().getRow() + 1);
+        String end = String.format("%s%s", columns.get(command.getMove().getEndPosition().getColumn() + 1),
+                command.getMove().getEndPosition().getRow() + 1);
+        return start + " to " + end;
+    }
+
     private void saveSession(int gameID, Session session) {}
 
     private void sendMessage(Session session, Exception e) {
@@ -79,7 +107,8 @@ public class WebSocketHandler {
 
     private void connect(Session session, String user, UserGameCommand command) throws IOException, DataAccessException {
         connections.add(command.getGameID(), user, session);
-        var message = String.format("%s connected", user);
+        String team = getTeam(user, command);
+        var message = String.format("%s joined as %s", user, team);
         NotificationMessage notification = new NotificationMessage(message);
         if (games.getGameByID(command.getGameID()) == null) {
             throw new DataAccessException("Error: game does not exist");
@@ -102,7 +131,7 @@ public class WebSocketHandler {
         games.updateGame(command.getMove(), command.getGameID());
         ChessGame game = games.getGameByID(command.getGameID()).game();
         String json = serializer.toJson(game);
-        var message = String.format("%s made a move", user);
+        var message = String.format("%s moved " + convertMoveToString(command), user);
         NotificationMessage notification = new NotificationMessage(message);
         connections.broadcast(command.getGameID(), user, notification);
         LoadGameMessage load = new LoadGameMessage(json);

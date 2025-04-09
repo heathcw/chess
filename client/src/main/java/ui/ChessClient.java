@@ -250,21 +250,24 @@ public class ChessClient {
         Map<String, Integer> columns = new HashMap<>();
         String[] whiteLetters = {"a", "b", "c", "d", "e", "f", "g", "h"};
         String[] blackLetters = {"h", "g", "f", "e", "d", "c", "b", "a"};
-        int i = 1;
+        int i;
         switch (team) {
             case "White" -> {
+                i = 1;
                 for (String letter : whiteLetters) {
                     columns.put(letter, i);
                     i++;
                 }
             }
             case "Black" -> {
+                i = 8;
                 for (String letter : blackLetters) {
                     columns.put(letter, i);
-                    i++;
+                    i--;
                 }
             }
         }
+
         return columns;
     }
 
@@ -352,7 +355,7 @@ public class ChessClient {
         //rows
         for (int i = 1; i <= 8; i++) {
             white = i % 2 == 0;
-            board.append(boardRow(i, game.getBoard().getBoard(), white, highlighted, toHighlight));
+            board.append(blackRow(i, game.getBoard().getBoard(), white, highlighted, toHighlight));
         }
 
         //bottom letters
@@ -372,6 +375,79 @@ public class ChessClient {
         StringBuilder row = new StringBuilder();
         row.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append(firstNumber).append(" ");
         for (int i = 0; i < 8; i++) {
+            ChessPosition move = new ChessPosition(rowNumber + 1, i + 1);
+            ChessMove check = new ChessMove(start, move, null);
+            if (white) {
+                if ((highlight != null && highlight.contains(check))
+                        || (start != null && rowNumber == start.getRow() && i == start.getColumn())) {
+                    row.append(SET_BG_COLOR_GREEN);
+                } else {
+                    row.append(SET_BG_COLOR_WHITE);
+                }
+                white = false;
+            } else {
+                if ((highlight != null && highlight.contains(check)) || (start != null && rowNumber == start.getRow()
+                        && i == start.getColumn() && highlight != null)) {
+                    row.append(SET_BG_COLOR_DARK_GREEN);
+                } else {
+                    row.append(SET_BG_COLOR_RED);
+                }
+                white = true;
+            }
+            if (board[rowNumber][i] == null) {
+                row.append(EMPTY);
+                continue;
+            }
+            switch (board[rowNumber][i].getPieceType()) {
+                case ChessPiece.PieceType.PAWN -> {
+                    switch (board[rowNumber][i].getTeamColor()) {
+                        case WHITE -> row.append(WHITE_PAWN);
+                        case BLACK -> row.append(BLACK_PAWN);
+                    }
+                }
+                case ChessPiece.PieceType.BISHOP -> {
+                    switch (board[rowNumber][i].getTeamColor()) {
+                        case WHITE -> row.append(WHITE_BISHOP);
+                        case BLACK -> row.append(BLACK_BISHOP);
+                    }
+                }
+                case ChessPiece.PieceType.ROOK -> {
+                    switch (board[rowNumber][i].getTeamColor()) {
+                        case WHITE -> row.append(WHITE_ROOK);
+                        case BLACK -> row.append(BLACK_ROOK);
+                    }
+                }
+                case ChessPiece.PieceType.KNIGHT -> {
+                    switch (board[rowNumber][i].getTeamColor()) {
+                        case WHITE -> row.append(WHITE_KNIGHT);
+                        case BLACK -> row.append(BLACK_KNIGHT);
+                    }
+                }
+                case ChessPiece.PieceType.KING -> {
+                    switch (board[rowNumber][i].getTeamColor()) {
+                        case WHITE -> row.append(WHITE_KING);
+                        case BLACK -> row.append(BLACK_KING);
+                    }
+                }
+                case ChessPiece.PieceType.QUEEN -> {
+                    switch (board[rowNumber][i].getTeamColor()) {
+                        case WHITE -> row.append(WHITE_QUEEN);
+                        case BLACK -> row.append(BLACK_QUEEN);
+                    }
+                }
+            }
+        }
+        row.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append(firstNumber).append(" ").append(RESET_BG_COLOR);
+        row.append('\n');
+        return row.toString();
+    }
+
+    private String blackRow(int rowNumber, ChessPiece[][] board, boolean white, Collection<ChessMove> highlight, ChessPosition start) {
+        String firstNumber = Integer.toString(rowNumber);
+        rowNumber--;
+        StringBuilder row = new StringBuilder();
+        row.append(SET_BG_COLOR_LIGHT_GREY).append(" ").append(firstNumber).append(" ");
+        for (int i = 7; i >= 0; i--) {
             ChessPosition move = new ChessPosition(rowNumber + 1, i + 1);
             ChessMove check = new ChessMove(start, move, null);
             if (white) {
