@@ -166,17 +166,19 @@ public class WebSocketHandler {
         } else if (data.blackUsername() != null && data.blackUsername().equals(user)) {
             games.leaveGame("BLACK", command.getGameID());
         }
-        connections.remove(command.getGameID(), user);
         var message = String.format("%s left the game", user);
         var notification = new NotificationMessage(message);
         connections.broadcast(command.getGameID(), user, notification);
         message = "You left the game";
-        session.getRemote().sendString(message);
+        notification = new NotificationMessage(message);
+        connections.notification(command.getGameID(), notification, user);
+        connections.remove(command.getGameID(), user);
     }
 
     private void resign(Session session, String user, UserGameCommand command) throws DataAccessException, IOException, InvalidMoveException {
         GameData data = games.getGameByID(command.getGameID());
-        if ((data.blackUsername() == null || !data.blackUsername().equals(user)) && (data.whiteUsername() == null || !data.whiteUsername().equals(user))) {
+        if ((data.blackUsername() == null || !data.blackUsername().equals(user)) && (data.whiteUsername() == null
+                || !data.whiteUsername().equals(user))) {
             throw new InvalidMoveException("Error: you are an observer");
         }
         games.gameOver(command.getGameID());
