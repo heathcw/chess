@@ -190,8 +190,14 @@ public class ChessClient {
 
     public String resign() throws ResponseException {
         assertInGame();
-        UserGameCommand request = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameId);
-        ws.connect(request);
+        System.out.println(SET_TEXT_COLOR_BLUE + "Are you sure? <YES|NO>");
+        System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine();
+        if (line.equalsIgnoreCase("yes")) {
+            UserGameCommand request = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameId);
+            ws.connect(request);
+        }
         return "";
     }
 
@@ -203,7 +209,7 @@ public class ChessClient {
         chessString = null;
         team = null;
         ws.connect(request);
-        return "";
+        return "You left the game";
     }
 
     public String highlight(String... params) throws ResponseException {
