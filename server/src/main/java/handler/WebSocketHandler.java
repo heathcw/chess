@@ -114,13 +114,13 @@ public class WebSocketHandler {
             connections.broadcast(command.getGameID(), user, notification);
             connections.notification(command.getGameID(), notification, user);
         }
-        if (game.isInCheck(ChessGame.TeamColor.BLACK)) {
+         else if (game.isInCheck(ChessGame.TeamColor.BLACK)) {
             message = "Black is in check";
             notification = new NotificationMessage(message);
             connections.broadcast(command.getGameID(), user, notification);
             connections.notification(command.getGameID(), notification, user);
         }
-        if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+        else if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
             game.gameOver();
             if (data.whiteUsername().equals(user)) {
                 message = "You lose!";
@@ -151,7 +151,7 @@ public class WebSocketHandler {
             notification = new NotificationMessage(message);
             connections.broadcast(command.getGameID(), user, notification);
         }
-        if (game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+        else if (game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK)) {
             message = "Stalemate!";
             notification = new NotificationMessage(message);
             connections.broadcast(command.getGameID(), user, notification);
@@ -169,9 +169,6 @@ public class WebSocketHandler {
         var message = String.format("%s left the game", user);
         var notification = new NotificationMessage(message);
         connections.broadcast(command.getGameID(), user, notification);
-        message = "You left the game";
-        notification = new NotificationMessage(message);
-        connections.notification(command.getGameID(), notification, user);
         connections.remove(command.getGameID(), user);
     }
 
