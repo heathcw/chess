@@ -231,19 +231,42 @@ public class ChessClient {
     public String makeMove(String... params) throws ResponseException {
         assertInGame();
         Map<String, Integer> columns = getStringIntegerMap();
-        if (params.length == 2) {
+        if (params.length >= 2) {
             int row = params[0].charAt(1) - '0';
             int col = columns.get(Character.toString(params[0].charAt(0)));
             ChessPosition start = new ChessPosition(row, col);
             row = params[1].charAt(1) - '0';
             col = columns.get(Character.toString(params[1].charAt(0)));
             ChessPosition end = new ChessPosition(row, col);
+            if (params.length == 3) {
+                ChessPiece.PieceType promotion;
+                switch (params[2]) {
+                    case "rook" -> promotion = ChessPiece.PieceType.ROOK;
+                    case "bishop" -> promotion = ChessPiece.PieceType.BISHOP;
+                    case "queen" -> promotion = ChessPiece.PieceType.QUEEN;
+                    case "knight" -> promotion = ChessPiece.PieceType.KNIGHT;
+                    default -> throw new ResponseException(400, "Expected: <STARTPOSITION> <ENDPOSITION> <PIECETYPE>");
+                }
+                ChessMove move = new ChessMove(start, end, promotion);
+                MakeMoveCommand command = new MakeMoveCommand(authToken, gameId, move);
+                ws.makeMove(command);
+                return "";
+            } else if (params.length > 3) {
+                throw new ResponseException(400, "Expected: <STARTPOSITION> <ENDPOSITION>");
+            }
             ChessMove move = new ChessMove(start, end, null);
             MakeMoveCommand command = new MakeMoveCommand(authToken, gameId, move);
             ws.makeMove(command);
             return "";
         }
         throw new ResponseException(400, "Expected: <STARTPOSITION> <ENDPOSITION>");
+    }
+
+    private ChessGame.TeamColor returnTeamColor() {
+        if (team.equals("Black")) {
+            return ChessGame.TeamColor.BLACK;
+        }
+        return ChessGame.TeamColor.WHITE;
     }
 
     private Map<String, Integer> getStringIntegerMap() {

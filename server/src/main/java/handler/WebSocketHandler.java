@@ -106,13 +106,13 @@ public class WebSocketHandler {
     }
 
     private void connect(Session session, String user, UserGameCommand command) throws IOException, DataAccessException {
+        if (games.getGameByID(command.getGameID()) == null) {
+            throw new DataAccessException("Error: game does not exist");
+        }
         connections.add(command.getGameID(), user, session);
         String team = getTeam(user, command);
         var message = String.format("%s joined as %s", user, team);
         NotificationMessage notification = new NotificationMessage(message);
-        if (games.getGameByID(command.getGameID()) == null) {
-            throw new DataAccessException("Error: game does not exist");
-        }
         connections.broadcast(command.getGameID(), user, notification);
         ChessGame game = games.getGameByID(command.getGameID()).game();
         String json = serializer.toJson(game);
