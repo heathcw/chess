@@ -108,6 +108,55 @@ public class WebSocketHandler {
         LoadGameMessage load = new LoadGameMessage(json);
         connections.load(command.getGameID(), load, user);
         connections.broadcast(command.getGameID(), user, load);
+        if (game.isInCheck(ChessGame.TeamColor.WHITE)) {
+            message = "White is in check";
+            notification = new NotificationMessage(message);
+            connections.broadcast(command.getGameID(), user, notification);
+            connections.notification(command.getGameID(), notification, user);
+        }
+        if (game.isInCheck(ChessGame.TeamColor.BLACK)) {
+            message = "Black is in check";
+            notification = new NotificationMessage(message);
+            connections.broadcast(command.getGameID(), user, notification);
+            connections.notification(command.getGameID(), notification, user);
+        }
+        if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+            game.gameOver();
+            if (data.whiteUsername().equals(user)) {
+                message = "You lose!";
+                notification = new NotificationMessage(message);
+                connections.notification(command.getGameID(), notification, user);
+                message = "White lost!";
+            } else {
+                message = "You win!";
+                notification = new NotificationMessage(message);
+                connections.notification(command.getGameID(), notification, user);
+                message = "black lost!";
+            }
+            notification = new NotificationMessage(message);
+            connections.broadcast(command.getGameID(), user, notification);
+        } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+            game.gameOver();
+            if (data.blackUsername().equals(user)) {
+                message = "You lose!";
+                notification = new NotificationMessage(message);
+                connections.notification(command.getGameID(), notification, user);
+                message = "White lost!";
+            } else {
+                message = "You win!";
+                notification = new NotificationMessage(message);
+                connections.notification(command.getGameID(), notification, user);
+                message = "black lost!";
+            }
+            notification = new NotificationMessage(message);
+            connections.broadcast(command.getGameID(), user, notification);
+        }
+        if (game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+            message = "Stalemate!";
+            notification = new NotificationMessage(message);
+            connections.broadcast(command.getGameID(), user, notification);
+            connections.notification(command.getGameID(), notification, user);
+        }
     }
 
     private void leave(Session session, String user, UserGameCommand command) throws IOException, DataAccessException {
@@ -121,11 +170,13 @@ public class WebSocketHandler {
         var message = String.format("%s left the game", user);
         var notification = new NotificationMessage(message);
         connections.broadcast(command.getGameID(), user, notification);
+        message = "You left the game";
+        session.getRemote().sendString(message);
     }
 
     private void resign(Session session, String user, UserGameCommand command) throws DataAccessException, IOException, InvalidMoveException {
         GameData data = games.getGameByID(command.getGameID());
-        if (!data.blackUsername().equals(user) && !data.whiteUsername().equals(user)) {
+        if ((data.blackUsername() == null || !data.blackUsername().equals(user)) && (data.whiteUsername() == null || !data.whiteUsername().equals(user))) {
             throw new InvalidMoveException("Error: you are an observer");
         }
         games.gameOver(command.getGameID());

@@ -8,10 +8,6 @@ import exception.ResponseException;
 import model.*;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ErrorMessage;
-import websocket.messages.LoadGameMessage;
-import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
 
 import static ui.EscapeSequences.*;
 
@@ -202,10 +198,10 @@ public class ChessClient {
     public String leave() throws ResponseException {
         assertInGame();
         state = State.SIGNEDIN;
+        UserGameCommand request = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameId);
         gameId = 0;
         chessString = null;
         team = null;
-        UserGameCommand request = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameId);
         ws.connect(request);
         return "";
     }

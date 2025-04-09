@@ -60,7 +60,7 @@ public class ChessRepl implements NotificationHandler {
             }
             case ERROR -> {
                 ErrorMessage error = new Gson().fromJson(message, ErrorMessage.class);
-                System.out.println(error.getErrorMessage());
+                System.out.println(SET_TEXT_COLOR_RED + error.getErrorMessage());
                 printPrompt();
             }
         }
